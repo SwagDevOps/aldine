@@ -7,7 +7,7 @@
 Gem::Specification.new do |s|
   s.name        = "aldine"
   s.version     = "0.0.1"
-  s.date        = "2021-01-10"
+  s.date        = "2021-08-02"
   s.summary     = "Light utilities for LaTeX"
   s.description = "Light utilities for LaTeX (standalone document preparation system)"
 
