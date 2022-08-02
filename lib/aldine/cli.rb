@@ -26,16 +26,17 @@ module Aldine::Cli
     # Module with classes/modules shared between several commands
     module Shared
       {
-        SvgConv: :svg_conv,
         FilesMatcher: :files_matcher,
+        SvgConv: :svg_conv,
       }.each { |k, v| autoload(k, "#{__dir__}/cli/commands/shared/#{v}") }
     end
 
     # Module for concerns.
     module Concerns
       {
-        SvgConvert: :svg_convert,
         ImageMatch: :image_match,
+        InputYaml: :input_yaml,
+        SvgConvert: :svg_convert,
       }.each { |k, v| autoload(k, "#{__dir__}/cli/commands/concerns/#{v}") }
     end
   end
