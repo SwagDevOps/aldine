@@ -3,6 +3,7 @@
 lib/**/*.rb                                   \
     --no-progress                             \
     --markup-provider 'redcarpet'             \
+    --plugin coderay                          \
     --markup 'markdown'                       \
     --charset 'utf-8'                         \
     --protected --private --embed-mixins      \
