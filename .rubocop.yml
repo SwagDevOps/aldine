@@ -1,0 +1,10 @@
+---
+inherit_gem:
+  kamaze-project:
+    - .rubocop.yml
+AllCops:
+  TargetRubyVersion: 2.7
+  NewCops: disable
+  SuggestExtensions: false
+Style/TernaryParentheses: { Enabled: false }
+

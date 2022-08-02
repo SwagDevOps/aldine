@@ -1,0 +1,24 @@
+---
+major: 0
+minor: 0
+patch: 1
+authors: ['Dimitri Arrigoni']
+email: 'dimitri@arrigoni.me'
+date: '2021-08-02'
+homepage: 'https://github.com/SwagDevOps/aldine'
+# MUST follow the higher required_ruby_version
+# requires version >= 2.3.0 due to safe navigation operator &
+# requires version >= 2.5.0 due to Lint/Syntax: unexpected token kRESCUE
+# requires version >= 2.7.0 due to ... operator
+required_ruby_version: '>= 2.7.0'
+summary: 'Light utilities for LaTeX'
+description: 'Light utilities for LaTeX (standalone document preparation system)'
+licenses: ['LGPL-3.0']
+license_header: |
+  Copyright (C) 2021-2022 Dimitri Arrigoni <dimitri@arrigoni.me>
+  License LGPLv3+: GNU Lesser General Public License version 3 or later
+  You may obtain a copy of the License at http://www.gnu.org/licenses/lgpl.txt.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an “AS IS” BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
