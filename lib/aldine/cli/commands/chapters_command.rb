@@ -12,7 +12,7 @@ require_relative '../app'
 # aldine chapters chapters.yml
 # ````
 class Aldine::Cli::Commands::ChaptersCommand < Aldine::Cli::Base::ErbCommand
-  autoload(:YAML, 'yaml')
+  include ::Aldine::Cli::Commands::Concerns::InputYaml
 
   def output_basepath
     input_file.expand_path.dirname.join(input_file.basename('.*')).to_path
@@ -41,16 +41,9 @@ class Aldine::Cli::Commands::ChaptersCommand < Aldine::Cli::Base::ErbCommand
     input_file.dirname.join(options.fetch(:basedir))
   end
 
-  # Load YAML file.
-  #
-  # @return [Array<String>]
-  def yaml_load
-    YAML.safe_load(input_file.read)
-  end
-
   # @return [Array<Pathname>]
   def files
-    yaml_load.map { |fp| texfiles_basedir.join("#{fp}.tex").freeze }
+    input_yaml.map { |fp| texfiles_basedir.join("#{fp}.tex").freeze }
   end
 
   # Get some options.
