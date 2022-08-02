@@ -2,7 +2,7 @@
 
 require_relative '../app'
 
-# A sample command
+# A sample command.
 #
 # This is a simple sample command.
 # Illustrates basic features. Produces random quotes in a HP Lovecraft's style.
@@ -19,13 +19,15 @@ class Aldine::Cli::Commands::SampleCommand < Aldine::Cli::Base::ErbCommand
 
   # @return [Pathname, nil]
   def source
-    super
-  rescue StandardError
-    nil
+    lambda do
+      super
+    rescue StandardError
+      template_name
+    end.call.then { |v| Pathname.new(v.to_s) }
   end
 
   class << self
-    # @todo add a better mechanism to override already defined pararemters
+    # @todo add a better override for already defined pararemters
     def parameters
       super.tap do |parameters|
         if parameters[0].name == 'SOURCE'
@@ -38,7 +40,9 @@ class Aldine::Cli::Commands::SampleCommand < Aldine::Cli::Base::ErbCommand
   protected
 
   def output_basepath
-    tmpdir.join("#{Digest::SHA1.hexdigest((source || template_name).to_s)}.#{Process.uid}").to_path
+    [template_name, Digest::SHA1.hexdigest(source.to_s)].then do |parts|
+      pwd.join(parts.join('.')).to_path
+    end
   end
 
   # @return [Class<Faker::Books::Lovecraft>]
@@ -46,7 +50,10 @@ class Aldine::Cli::Commands::SampleCommand < Aldine::Cli::Base::ErbCommand
     Faker::Books::Lovecraft
   end
 
-  def tmpdir
-    require('tmpdir').then { Pathname.new(Dir.tmpdir) }
+  # @api private
+  #
+  # @return [Pathname]
+  def pwd
+    Pathname.new(Dir.pwd)
   end
 end
