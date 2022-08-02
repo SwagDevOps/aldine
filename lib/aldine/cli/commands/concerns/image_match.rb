@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative '../../app'
 
 # Provide methods to match image files with a filepath without extension (``source``).
