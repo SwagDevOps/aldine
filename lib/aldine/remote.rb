@@ -17,9 +17,11 @@ module Aldine::Remote
     {
       Config: :config,
       Path: :path,
-      Synchro: :synchro,
       InotifyWait: :inotify_wait,
       PdfBuilder: :pdf_builder,
+      # processes -----------------------------------------------------
+      BundleSetup: :bundle_setup,
+      Synchro: :synchro,
     }.each { |k, v| autoload(k, "#{path}/#{v}") }
   end
 end
