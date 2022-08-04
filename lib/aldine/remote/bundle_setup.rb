@@ -29,15 +29,40 @@ class Aldine::Remote::BundleSetup < Aldine::Shell::Command
   # @return [Pathname]
   attr_accessor :source_dir
 
+  # Get a builder providing arguments used to initialize command.
+  #
+  # @return [Proc]
   def arguments_builder
     lambda do
-      %w[ln -sfr].concat(files).concat([target_dir.expand_path.to_s])
+      %w[ln -sfr]
+        .concat(files.map(&:to_path))
+        .concat([target_dir.expand_path.to_s])
     end
   end
 
+  # @return [Array<Pathname>]
   def files
-    %w[gems.rb gems.locked vendor .bundle].map do |filename|
-      source_dir.join(filename).realpath.to_s
+    %w[gems.rb gems.locked .bundle]
+      .map { |filename| source_dir.join(filename) }
+      .concat([bundle_path])
+      .map(&:realpath)
+  end
+
+  # @return [Hash{String => String}]
+  def bundle_config
+    ::Aldine::Utils::BundleConfig.new(source_dir).read
+  end
+
+  # Get path to the bundle (install) directory.
+  #
+  # @return [Pathname]
+  def bundle_path
+    bundle_config.then do |config|
+      config.fetch('BUNDLE_PATH').then do |path|
+        path.split('/').compact.first.then do |dir|
+          source_dir.join(dir) # extract first segment and append to source dir
+        end
+      end
     end
   end
 end
