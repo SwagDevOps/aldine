@@ -20,9 +20,10 @@ module Aldine
     {
       Bundleable: :bundleable,
       Cli: :cli,
+      Local: :local,
       Remote: :remote,
       Shell: :shell,
-      Local: :local,
+      Utils: :utils,
     }.each { |k, v| autoload(k, libdir.join(v.to_s)) }
 
     include Bundleable
