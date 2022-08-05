@@ -51,12 +51,15 @@ class Aldine::Remote::BundleSetup < Aldine::Shell::Command
     end
   end
 
+  # Get files (as absolute paths) in source dir to symlink.
+  #
   # @return [Array<Pathname>]
   def files
     %w[gems.rb gems.locked .bundle]
       .map { |filename| source_dir.join(filename) }
       .concat([bundle_path])
       .map(&:realpath)
+      .sort
   end
 
   # @return [Hash{String => String}]
