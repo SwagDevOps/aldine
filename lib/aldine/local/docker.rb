@@ -32,7 +32,7 @@ module Aldine::Local::Docker
 
     def directories
       # tex directories
-      %w[out src tmp].sort.freeze
+      %w[out src tmp .tmp/bundle].sort.freeze
     end
 
     def build
@@ -50,6 +50,7 @@ module Aldine::Local::Docker
     # @return [Process::Status]
     def run(command = [], path: nil, user: nil)
       user ||= self.user
+      bundle_basedir = bundle_config.bundle_basedir.basename
 
       [
         '/usr/bin/env', 'docker', 'run', '--rm',
@@ -58,20 +59,23 @@ module Aldine::Local::Docker
         '-e', "TERM=#{ENV.fetch('TERM', 'xterm')}",
         '-e', "OUTPUT_NAME=#{tex.output_name}",
         '-e', "TMPDIR=/tmp/u#{user.uid}",
+        '-v', "#{shell.pwd.join('.tmp').realpath}:/tmp/u#{user.uid}",
+        '-v', "#{shell.pwd.join('.tmp').realpath.join('bundle')}:#{workdir.join(bundle_basedir)}",
         '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
         '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
-        '-v', "#{shell.pwd.join('vendor').realpath}:#{workdir.join('vendor')}",
         '-v', "#{shell.pwd.join('.bundle').realpath}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}:ro",
         '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
         '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
-        '-v', "#{shell.pwd.join('.tmp').realpath}:/tmp/u#{user.uid}",
         '-w', "/workdir/#{path}",
         image
       ]
         .compact
         .concat(command)
-        .then { |params| shell.sh(*params) }
+        .then do |params|
+          directories.each { |dir| fs.mkdir_p(dir) }
+          shell.sh(*params)
+        end
     end
 
     # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
@@ -96,6 +100,11 @@ module Aldine::Local::Docker
 
     def tex
       ::Aldine::Local::Tex
+    end
+
+    # @return [Aldine::Utils::BundleConfig]
+    def bundle_config
+      ::Aldine::Utils::BundleConfig.new(shell.pwd)
     end
   end
 end
