@@ -15,12 +15,14 @@ class Aldine::Utils::BundleConfig
   autoload(:Pathname, 'pathname')
   autoload(:YAML, 'yaml')
 
+  # @param [String, Pathname] basedir
   def initialize(basedir)
     super().tap do
       self.basedir = Pathname.new(basedir)
     end.freeze
   end
 
+  # @return [Hash{String => String}]
   def read
     filepath.read.then do |content|
       YAML.safe_load(content)
@@ -29,8 +31,12 @@ class Aldine::Utils::BundleConfig
 
   protected
 
+  # @return [Pathname]
   attr_accessor :basedir
 
+  # Get path to config file.
+  #
+  # @return [Pathname]
   def filepath
     self.basedir.join('.bundle/config')
   end
