@@ -6,8 +6,8 @@
 # noinspection RubyLiteralArrayInspection
 Gem::Specification.new do |s|
   s.name        = "aldine"
-  s.version     = "0.0.1"
-  s.date        = "2021-08-02"
+  s.version     = "0.0.2"
+  s.date        = "2021-08-05"
   s.summary     = "Light utilities for LaTeX"
   s.description = "Light utilities for LaTeX (standalone document preparation system)"
 
@@ -56,6 +56,7 @@ Gem::Specification.new do |s|
     "lib/aldine/local/tasks.rb",
     "lib/aldine/local/tex.rb",
     "lib/aldine/remote.rb",
+    "lib/aldine/remote/bundle_setup.rb",
     "lib/aldine/remote/config.rb",
     "lib/aldine/remote/inotify_wait.rb",
     "lib/aldine/remote/path.rb",
@@ -67,6 +68,8 @@ Gem::Specification.new do |s|
     "lib/aldine/shell/command.rb",
     "lib/aldine/shell/command_error.rb",
     "lib/aldine/shell/readline.rb",
+    "lib/aldine/utils.rb",
+    "lib/aldine/utils/bundle_config.rb",
     "lib/aldine/version.yml",
   ]
 
