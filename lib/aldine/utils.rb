@@ -10,18 +10,9 @@
 
 require_relative '../aldine'
 
-# Module related to rake remote tasks.
-module Aldine::Remote
-  # noinspection RubyLiteralArrayInspection,RubyResolve
-  "#{__dir__}/remote".tap do |path|
-    {
-      Config: :config,
-      Path: :path,
-      InotifyWait: :inotify_wait,
-      PdfBuilder: :pdf_builder,
-      # processes -----------------------------------------------------
-      BundleSetup: :bundle_setup,
-      Synchro: :synchro,
-    }.each { |k, v| autoload(k, "#{path}/#{v}") }
-  end
+# Global utilities
+module Aldine::Utils
+  {
+    BundleConfig: 'bundle_config',
+  }.each { |k, v| autoload(k, "#{__dir__}/utils/#{v}") }
 end
