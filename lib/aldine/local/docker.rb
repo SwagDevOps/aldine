@@ -12,7 +12,16 @@ require_relative '../local'
 
 # Local to docker communication methods.
 module Aldine::Local::Docker
+  autoload(:Pathname, 'pathname')
+
   class << self
+    # Get workdir used inside docker container.
+    #
+    # @return [Pathname
+    def workdir
+      '/workdir'.then { |path| Pathname.new(path) }
+    end
+
     def user
       shell.user
     end
@@ -49,13 +58,13 @@ module Aldine::Local::Docker
         '-e', "TERM=#{ENV.fetch('TERM', 'xterm')}",
         '-e', "OUTPUT_NAME=#{tex.output_name}",
         '-e', "TMPDIR=/tmp/u#{user.uid}",
-        '-v', "#{shell.pwd.join('gems.rb').realpath}:/workdir/gems.rb:ro",
-        '-v', "#{shell.pwd.join('gems.locked').realpath}:/workdir/gems.locked:ro",
-        '-v', "#{shell.pwd.join('vendor').realpath}:/workdir/vendor",
-        '-v', "#{shell.pwd.join('.bundle').realpath}:/workdir/.bundle",
-        '-v', "#{shell.pwd.join('src').realpath}:/workdir/src:ro",
-        '-v', "#{shell.pwd.join('out').realpath}:/workdir/out",
-        '-v', "#{shell.pwd.join('tmp').realpath}:/workdir/tmp",
+        '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
+        '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
+        '-v', "#{shell.pwd.join('vendor').realpath}:#{workdir.join('vendor')}",
+        '-v', "#{shell.pwd.join('.bundle').realpath}:#{workdir.join('.bundle')}",
+        '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}:ro",
+        '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
+        '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
         '-v', "#{shell.pwd.join('.tmp').realpath}:/tmp/u#{user.uid}",
         '-w', "/workdir/#{path}",
         image
