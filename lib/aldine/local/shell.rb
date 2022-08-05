@@ -12,7 +12,6 @@ require_relative '../local'
 
 # Shell related methods
 module Aldine::Local::Shell
-  autoload(:FileUtils, 'fileutils')
   autoload(:Etc, 'etc')
   autoload(:Pathname, 'pathname')
 
@@ -27,9 +26,15 @@ module Aldine::Local::Shell
       ![$stdin, $stdout, $stdout].map(&:tty?).include?(false)
     end
 
+    # @param [Boolean] silent
+    #
     # @return [Module<FileUtils>, Module<FileUtils::Verbose>]
-    def fs
-      FileUtils::Verbose
+    def fs(silent: false)
+      require('fileutils').then do
+        ::FileUtils::Verbose.instance_variable_set(:@fileutils_output, $stderr)
+
+        silent ? ::FileUtils : ::FileUtils::Verbose
+      end
     end
 
     # @return [Struct]

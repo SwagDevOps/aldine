@@ -31,8 +31,10 @@ module Aldine::Local::Docker
     end
 
     def directories
-      # tex directories
-      %w[out src tmp .tmp/bundle].sort.freeze
+      %w[out src tmp] # tex directories
+        .concat(['.tmp/.sys/bundle']) # bundle vendoring
+        .sort
+        .freeze
     end
 
     def build
@@ -50,7 +52,6 @@ module Aldine::Local::Docker
     # @return [Process::Status]
     def run(command = [], path: nil, user: nil)
       user ||= self.user
-      bundle_basedir = bundle_config.bundle_basedir.basename
 
       [
         '/usr/bin/env', 'docker', 'run', '--rm',
@@ -60,22 +61,24 @@ module Aldine::Local::Docker
         '-e', "OUTPUT_NAME=#{tex.output_name}",
         '-e', "TMPDIR=/tmp/u#{user.uid}",
         '-v', "#{shell.pwd.join('.tmp').realpath}:/tmp/u#{user.uid}",
-        '-v', "#{shell.pwd.join('.tmp').realpath.join('bundle')}:#{workdir.join(bundle_basedir)}",
+        '-v', "#{shell.pwd.join('.tmp').realpath.join('.sys/bundle')}:#{workdir.join(bundle_basedir)}",
         '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
         '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
         '-v', "#{shell.pwd.join('.bundle').realpath}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}:ro",
         '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
         '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
-        '-w', "/workdir/#{path}",
+        '-w', workdir.join(path.to_s).to_path,
         image
       ]
         .compact
         .concat(command)
+        # @formatter:off
         .then do |params|
-          directories.each { |dir| fs.mkdir_p(dir) }
+          directories.each { |dir| fs(silent: true).mkdir_p(dir) }
           shell.sh(*params)
         end
+      # @formatter:on
     end
 
     # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
@@ -90,8 +93,9 @@ module Aldine::Local::Docker
 
     protected
 
-    def fs
-      shell.fs
+    # @return [Module<::FileUtils>, Module<::FileUtils::Verbose>]
+    def fs(**kwargs)
+      shell.fs(**kwargs)
     end
 
     def shell
@@ -102,9 +106,11 @@ module Aldine::Local::Docker
       ::Aldine::Local::Tex
     end
 
-    # @return [Aldine::Utils::BundleConfig]
-    def bundle_config
-      ::Aldine::Utils::BundleConfig.new(shell.pwd)
+    # @return [String]
+    def bundle_basedir
+      shell.pwd.then do |basedir|
+        ::Aldine::Utils::BundleConfig.new(basedir).bundle_basedir.relative_path_from(basedir).to_path
+      end
     end
   end
 end
