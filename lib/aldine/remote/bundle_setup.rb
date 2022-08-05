@@ -57,46 +57,18 @@ class Aldine::Remote::BundleSetup < Aldine::Shell::Command
   def files
     %w[gems.rb gems.locked .bundle]
       .map { |filename| source_dir.join(filename) }
-      .concat([bundle_path])
+      .concat([bundle_config.bundle_basedir])
       .map(&:realpath)
       .sort
   end
 
-  # @return [Hash{String => String}]
+  # @return [Aldine::Utils::BundleConfig]
   def bundle_config
-    ::Aldine::Utils::BundleConfig.new(source_dir).read
-  end
-
-  # Get path to the bundle (install) directory.
-  #
-  # @return [Pathname]
-  def bundle_path
-    bundle_config.then do |config|
-      config.fetch('BUNDLE_PATH')
-            .then { |path| Pathname.new(path) }
-            .then { |path| ensure_relative_path(path, from: source_dir) }
-    end
+    ::Aldine::Utils::BundleConfig.new(source_dir)
   end
 
   # @return [Module<FileUtils>, Module<FileUtils::Verbose>]
   def fs
     silent? ? FileUtils : FileUtils::Verbose
-  end
-
-  # @param [Pathname] path
-  # @param [Pathname] from
-  #
-  # @return [Pathname]
-  def ensure_relative_path(path, from:)
-    raise "given path #{path.to_path.inspect} is not a relative path" unless path.relative?
-
-    from.join(path).relative_path_from(from).then do |relative_path|
-      raise 'relative path can not traverse the file system' if relative_path.to_path.match(%r{\.{2}/})
-
-      # extract first segment and append to ``from`` dir
-      relative_path.to_path.gsub(%r{^(\./+)+}, '').split('/').compact.first.then do |base_dir|
-        from.join(base_dir)
-      end
-    end
   end
 end
