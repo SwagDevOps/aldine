@@ -32,7 +32,7 @@ module Aldine::Local::Docker
 
     def directories
       %w[out src tmp] # tex directories
-        .concat(['.tmp/.sys/bundle']) # bundle vendoring
+        .concat(%w[.tmp/.sys/bundler/package .tmp/.sys/bundler/config]) # bundle vendoring + config
         .sort
         .freeze
     end
@@ -61,10 +61,10 @@ module Aldine::Local::Docker
         '-e', "OUTPUT_NAME=#{tex.output_name}",
         '-e', "TMPDIR=/tmp/u#{user.uid}",
         '-v', "#{shell.pwd.join('.tmp').realpath}:/tmp/u#{user.uid}",
-        '-v', "#{shell.pwd.join('.tmp').realpath.join('.sys/bundle')}:#{workdir.join(bundle_basedir)}",
+        '-v', "#{shell.pwd.join('.tmp').realpath.join('.sys/bundler/package')}:#{workdir.join(bundle_basedir)}",
+        '-v', "#{shell.pwd.join('.tmp').realpath.join('.sys/bundler/config')}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
         '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
-        '-v', "#{shell.pwd.join('.bundle').realpath}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}:ro",
         '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
         '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
@@ -75,7 +75,12 @@ module Aldine::Local::Docker
         .concat(command)
         # @formatter:off
         .then do |params|
-          directories.each { |dir| fs(silent: true).mkdir_p(dir) }
+          # bundler setup
+          fs(silent: true).then do |fs|
+            directories.each { |dir| fs.mkdir_p(dir) }
+            fs.cp_r(bundle_config.realpath, shell.pwd.join('.tmp').realpath.join('.sys/bundler/config'))
+          end
+
           shell.sh(*params)
         end
       # @formatter:on
@@ -106,10 +111,17 @@ module Aldine::Local::Docker
       ::Aldine::Local::Tex
     end
 
+    # @return [Aldine::Utils::BundleConfig]
+    def bundle_config
+      shell.pwd.then do |basedir|
+        ::Aldine::Utils::BundleConfig.new(basedir)
+      end
+    end
+
     # @return [String]
     def bundle_basedir
       shell.pwd.then do |basedir|
-        ::Aldine::Utils::BundleConfig.new(basedir).bundle_basedir.relative_path_from(basedir).to_path
+        bundle_config.bundle_basedir.relative_path_from(basedir).to_path
       end
     end
   end

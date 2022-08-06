@@ -30,6 +30,16 @@ class Aldine::Utils::BundleConfig
   end
 
   # @return [String]
+  def to_path
+    filepath.to_path
+  end
+
+  # @return [Pathname]
+  def realpath
+    filepath.realpath
+  end
+
+  # @return [String]
   def bundle_path
     read.fetch('BUNDLE_PATH')
   end
