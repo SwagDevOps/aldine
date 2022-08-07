@@ -15,24 +15,28 @@ module Aldine::Local::Docker
   autoload(:Pathname, 'pathname')
 
   class << self
-    # Get workdir used inside docker container.
+    # Get current UNIX user.
     #
-    # @return [Pathname
-    def workdir
-      '/workdir'.then { |path| Pathname.new(path) }
-    end
-
+    # @see https://ruby-doc.org/stdlib-2.5.3/libdoc/etc/rdoc/Etc.html#method-c-getpwnam
+    #
+    # @return [Struct]
     def user
       shell.user
     end
 
+    # Get image name.
+    #
+    # @return [String]
     def image
       "u#{user.uid}/texlive-#{tex.project_name}"
     end
 
+    # Get list of directories used by docker.
+    #
+    # @return [Array<String>]
     def directories
       %w[out src tmp] # tex directories
-        .concat(%w[pack conf].map { |dir| ".tmp/.sys/bundler/#{dir}" }) # bundle vendoring + config
+        .concat(%w[pack conf].map { |dir| ".tmp/.sys/bundle/#{dir}" }) # bundle vendoring + config
         .sort
         .freeze
     end
@@ -59,10 +63,10 @@ module Aldine::Local::Docker
         '-u', [user.uid, user.gid].join(':'),
         '-e', "TERM=#{ENV.fetch('TERM', 'xterm')}",
         '-e', "OUTPUT_NAME=#{tex.output_name}",
-        '-e', "TMPDIR=/tmp/u#{user.uid}",
-        '-v', "#{shell.pwd.join('.tmp').realpath}:/tmp/u#{user.uid}",
-        '-v', "#{shell.pwd.join('.tmp').realpath.join('.sys/bundle/pack')}:#{workdir.join(bundle_basedir)}",
-        '-v', "#{shell.pwd.join('.tmp').realpath.join('.sys/bundle/conf')}:#{workdir.join('.bundle')}",
+        '-e', "TMPDIR=#{tmpdir.remote}",
+        '-v', "#{tmpdir.local}:#{tmpdir.remote}",
+        '-v', "#{tmpdir.local.join('.sys/bundle/pack')}:#{workdir.join(bundle_basedir)}",
+        '-v', "#{tmpdir.local.join('.sys/bundle/conf')}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
         '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
         '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}:ro",
@@ -73,14 +77,8 @@ module Aldine::Local::Docker
       ]
         .compact
         .concat(command)
-        # @formatter:off
-        .then do |params|
-          # bundler setup
-          fs(silent: true).then do |fs|
-            directories.each { |dir| fs.mkdir_p(dir) }
-            fs.cp(bundle_config.realpath, shell.pwd.join('.tmp').realpath.join('.sys/bundle/conf'))
-          end
-
+        .then do |params| # @formatter:off
+          self.prepare
           shell.sh(*params)
         end
       # @formatter:on
@@ -97,6 +95,38 @@ module Aldine::Local::Docker
     end
 
     protected
+
+    # Prepare docker execution.
+    #
+    # @return [self]
+    def prepare(silent: true)
+      self.tap do
+        fs(silent: silent).then do |fs|
+          directories.each { |dir| fs.mkdir_p(dir) }
+
+          fs.cp(bundle_config.realpath, tmpdir.local.realpath.join('.sys/bundle/conf'))
+        end
+      end
+    end
+
+    # Get workdir used inside docker container.
+    #
+    # @return [Pathname
+    def workdir
+      '/workdir'.then { |path| Pathname.new(path) }
+    end
+
+    # Get an object representation of the ``tmpdir`` with local and remote path.
+    #
+    # @return [Struct]
+    def tmpdir
+      {
+        local: shell.pwd.expand_path.join('.tmp'),
+        remote: Pathname.new("/tmp/u#{user.uid}"),
+      }.then do |paths|
+        Struct.new(:remote, :local, keyword_init: true).new(**paths)
+      end
+    end
 
     # @return [Module<::FileUtils>, Module<::FileUtils::Verbose>]
     def fs(**kwargs)
