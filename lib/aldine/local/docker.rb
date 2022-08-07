@@ -32,7 +32,7 @@ module Aldine::Local::Docker
 
     def directories
       %w[out src tmp] # tex directories
-        .concat(%w[.tmp/.sys/bundler/package .tmp/.sys/bundler/config]) # bundle vendoring + config
+        .concat(%w[pack conf].map { |dir| ".tmp/.sys/bundler/#{dir}" }) # bundle vendoring + config
         .sort
         .freeze
     end
@@ -61,8 +61,8 @@ module Aldine::Local::Docker
         '-e', "OUTPUT_NAME=#{tex.output_name}",
         '-e', "TMPDIR=/tmp/u#{user.uid}",
         '-v', "#{shell.pwd.join('.tmp').realpath}:/tmp/u#{user.uid}",
-        '-v', "#{shell.pwd.join('.tmp').realpath.join('.sys/bundler/package')}:#{workdir.join(bundle_basedir)}",
-        '-v', "#{shell.pwd.join('.tmp').realpath.join('.sys/bundler/config')}:#{workdir.join('.bundle')}",
+        '-v', "#{shell.pwd.join('.tmp').realpath.join('.sys/bundle/pack')}:#{workdir.join(bundle_basedir)}",
+        '-v', "#{shell.pwd.join('.tmp').realpath.join('.sys/bundle/conf')}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
         '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
         '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}:ro",
@@ -78,7 +78,7 @@ module Aldine::Local::Docker
           # bundler setup
           fs(silent: true).then do |fs|
             directories.each { |dir| fs.mkdir_p(dir) }
-            fs.cp_r(bundle_config.realpath, shell.pwd.join('.tmp').realpath.join('.sys/bundler/config'))
+            fs.cp(bundle_config.realpath, shell.pwd.join('.tmp').realpath.join('.sys/bundle/conf'))
           end
 
           shell.sh(*params)
