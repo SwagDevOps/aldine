@@ -41,6 +41,9 @@ module Aldine::Local::Docker
         .freeze
     end
 
+    # Build docker image.
+    #
+    # @return [Process::Status]
     def build
       shell.sh('/usr/bin/env', 'docker', 'build', '-t', image, './docker')
     end
@@ -58,10 +61,16 @@ module Aldine::Local::Docker
       end
     end
 
+    # Install dependencies.
+    #
+    # @return [Process::Status]
     def install
       run(%w[bundle install --standalone])
     end
 
+    # Execute given task with rake (in given path if any).
+    #
+    # @return [Process::Status]
     def rake(task, path: nil)
       run(%w[bundle exec rake].concat([task.to_s]), path: path)
     end
