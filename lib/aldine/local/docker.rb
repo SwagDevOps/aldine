@@ -45,46 +45,18 @@ module Aldine::Local::Docker
       shell.sh('/usr/bin/env', 'docker', 'build', '-t', image, './docker')
     end
 
-    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-
     # Executes given command in a container.
     #
     # @param [Array<String>] command
-    # @param [String] path
-    # @param [Struct] user
+    # @param [String, nil] path
+    # @param [Struct, nil] user
     #
     # @return [Process::Status]
     def run(command = [], path: nil, user: nil)
-      user ||= self.user
-
-      [
-        '/usr/bin/env', 'docker', 'run', '--rm',
-        shell.tty? ? '-it' : nil,
-        '-u', [user.uid, user.gid].join(':'),
-        '-e', "TERM=#{ENV.fetch('TERM', 'xterm')}",
-        '-e', "OUTPUT_NAME=#{tex.output_name}",
-        '-e', "TMPDIR=#{tmpdir.remote}",
-        '-v', "#{tmpdir.local}:#{tmpdir.remote}",
-        '-v', "#{tmpdir.local.join('.sys/bundle/pack')}:#{workdir.join(bundle_basedir)}",
-        '-v', "#{tmpdir.local.join('.sys/bundle/conf')}:#{workdir.join('.bundle')}",
-        '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
-        '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
-        '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}:ro",
-        '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
-        '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
-        '-w', workdir.join(path.to_s).to_path,
-        image
-      ]
-        .compact
-        .concat(command)
-        .then do |params| # @formatter:off
-          self.prepare
-          shell.sh(*params)
-        end
-      # @formatter:on
+      around_execute do
+        execute(command, path: path, user: user || self.user)
+      end
     end
-
-    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
     def install
       run(%w[bundle install --standalone])
@@ -96,18 +68,51 @@ module Aldine::Local::Docker
 
     protected
 
-    # Prepare docker execution.
+    # Wrap (and prepare) docker execution.
     #
-    # @return [self]
-    def prepare(silent: true)
-      self.tap do
-        fs(silent: silent).then do |fs|
-          directories.each { |dir| fs.mkdir_p(dir) }
+    # @return [Process::Status]
+    def around_execute(&execute_stt)
+      fs(silent: true).then do |fs|
+        directories.each { |dir| fs.mkdir_p(dir) }
 
-          fs.cp(bundle_config.realpath, tmpdir.local.realpath.join('.sys/bundle/conf'))
-        end
-      end
+        fs.cp(bundle_config.realpath, tmpdir.local.realpath.join('.sys/bundle/conf'))
+      end.then { execute_stt.call }
     end
+
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+
+    # Executes given command in a container.
+    #
+    # @param [Array<String>] command
+    # @param [String, nil] path
+    # @param [Struct] user
+    #
+    # @return [Process::Status]
+    def execute(command = [], user:, path: nil)
+      [
+        '/usr/bin/env', 'docker', 'run', '--rm',
+        shell.tty? ? '-it' : nil,
+        '-u', [user.uid, user.gid].join(':'),
+        '-e', "TERM=#{ENV.fetch('TERM', 'xterm')}",
+        '-e', "OUTPUT_NAME=#{tex.output_name}",
+        '-e', "TMPDIR=#{tmpdir.remote}",
+        '-v', "#{tmpdir.local.realpath}:#{tmpdir.remote}",
+        '-v', "#{tmpdir.local.join('.sys/bundle/pack').realpath}:#{workdir.join(bundle_basedir)}",
+        '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
+        '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
+        '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
+        '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}:ro",
+        '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
+        '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
+        '-w', workdir.join(path.to_s).to_path,
+        image
+      ]
+        .compact
+        .concat(command)
+        .then { |params| shell.sh(*params) }
+    end
+
+    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
     # Get workdir used inside docker container.
     #
@@ -116,16 +121,14 @@ module Aldine::Local::Docker
       '/workdir'.then { |path| Pathname.new(path) }
     end
 
-    # Get an object representation of the ``tmpdir`` with local and remote path.
+    # Get an object representation of the ``tmpdir`` with local and remote paths.
     #
     # @return [Struct]
     def tmpdir
       {
         local: shell.pwd.expand_path.join('.tmp'),
         remote: Pathname.new("/tmp/u#{user.uid}"),
-      }.then do |paths|
-        Struct.new(:remote, :local, keyword_init: true).new(**paths)
-      end
+      }.then { |paths| Struct.new(*paths.keys, keyword_init: true).new(**paths) }
     end
 
     # @return [Module<::FileUtils>, Module<::FileUtils::Verbose>]
