@@ -25,6 +25,7 @@ module Aldine::Remote
       PdfBuilder: :pdf_builder,
       # processes -----------------------------------------------------
       BundleSetup: :bundle_setup,
+      RakeSetup: :rake_setup,
       Synchro: :synchro,
     }.each { |k, v| autoload(k, "#{path}/#{v}") }
   end
