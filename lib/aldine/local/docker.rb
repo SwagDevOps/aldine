@@ -110,9 +110,10 @@ module Aldine::Local::Docker
         '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
         '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
-        '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}:ro",
+        '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}",
         '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
         '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
+        '-v', "#{::Aldine::Remote::RESOURCES_DIR.join('rake/Rakefile')}:#{workdir.join('src/Rakefile')}:ro",
         '-w', workdir.join(path.to_s).to_path,
         image
       ]

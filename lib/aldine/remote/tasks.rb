@@ -107,6 +107,5 @@ task :sync do
   [
     Aldine::Remote::Synchro.new(path.configure(:src_dir), path.configure(:tex_dir)),
     Aldine::Remote::BundleSetup.new(path.configure(:tex_dir)),
-    Aldine::Remote::RakeSetup.new(path.configure(:tex_dir))
   ].each(&:call)
 end
