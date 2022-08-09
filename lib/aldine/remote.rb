@@ -12,6 +12,10 @@ require_relative '../aldine'
 
 # Module related to rake remote tasks.
 module Aldine::Remote
+  autoload(:Pathname, 'pathname')
+
+  RESOURCES_DIR = Pathname.new(__FILE__.gsub(/\.rb$/, '')).join('resources').realpath.freeze
+
   # noinspection RubyLiteralArrayInspection,RubyResolve
   "#{__dir__}/remote".tap do |path|
     {
