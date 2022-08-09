@@ -6,8 +6,8 @@
 # noinspection RubyLiteralArrayInspection
 Gem::Specification.new do |s|
   s.name        = "aldine"
-  s.version     = "0.0.2"
-  s.date        = "2021-08-05"
+  s.version     = "0.0.3"
+  s.date        = "2021-08-09"
   s.summary     = "Light utilities for LaTeX"
   s.description = "Light utilities for LaTeX (standalone document preparation system)"
 

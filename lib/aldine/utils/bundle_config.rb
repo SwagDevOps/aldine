@@ -29,6 +29,30 @@ class Aldine::Utils::BundleConfig
     end
   end
 
+  # @return [String]
+  def to_path
+    filepath.to_path
+  end
+
+  # @return [Pathname]
+  def realpath
+    filepath.realpath
+  end
+
+  # @return [String]
+  def bundle_path
+    read.fetch('BUNDLE_PATH')
+  end
+
+  # @return [Pathname]
+  def bundle_basedir
+    bundle_path
+      .then { |path| Pathname.new(path) }
+      .then { |path| ensure_relative_path(path, from: basedir) }
+      .then { |path| path.to_path.gsub(%r{^(\./+)+}, '').split('/').compact.first }
+      .then { |basedir| self.basedir.join(basedir) }
+  end
+
   protected
 
   # @return [Pathname]
@@ -39,5 +63,19 @@ class Aldine::Utils::BundleConfig
   # @return [Pathname]
   def filepath
     self.basedir.join('.bundle/config')
+  end
+
+  # @param [Pathname] path
+  # @param [Pathname] from
+  #
+  # @return [Pathname]
+  def ensure_relative_path(path, from:)
+    raise "given path #{path.to_path.inspect} is not a relative path" unless path.relative?
+
+    from.join(path).relative_path_from(from).then do |relative_path|
+      raise 'relative path can not traverse the file system' if relative_path.to_path.match(%r{\.{2}/})
+
+      relative_path
+    end
   end
 end
