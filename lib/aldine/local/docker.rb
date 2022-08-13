@@ -14,6 +14,12 @@ require_relative '../local'
 module Aldine::Local::Docker
   autoload(:Pathname, 'pathname')
 
+  Pathname.new(__FILE__.gsub(/\.rb$/, '')).realpath.tap do |path|
+    {
+      RakeRunner: 'rake_runner',
+    }.each { |k, v| autoload(k, "#{path}/#{v}") }
+  end
+
   class << self
     # Get current UNIX user.
     #
@@ -72,7 +78,7 @@ module Aldine::Local::Docker
     #
     # @return [Process::Status]
     def rake(task, path: nil)
-      run(%w[bundle exec rake].concat([task.to_s]), path: path)
+      rake_runner.call(task.to_s, path: path)
     end
 
     protected
@@ -113,7 +119,7 @@ module Aldine::Local::Docker
         '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}",
         '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
         '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
-        '-v', "#{::Aldine::Remote::RESOURCES_DIR.join('rake/Rakefile')}:#{workdir.join('src/Rakefile')}:ro",
+        '-v', "#{::Aldine::Remote::RESOURCES_DIR.join('rake/Rakefile').realpath}:#{workdir.join('src/Rakefile')}:ro",
         '-w', workdir.join(path.to_s).to_path,
         image
       ]
@@ -152,6 +158,17 @@ module Aldine::Local::Docker
 
     def tex
       ::Aldine::Local::Tex
+    end
+
+    # @see #rake()
+    #
+    # @return [Aldine::Local::Docker::RakeRunner]
+    def rake_runner
+      lambda do |command, **options|
+        self.run(command, **options)
+      end.then do |runner|
+        ::Aldine::Local::Docker::RakeRunner.new(runner)
+      end
     end
 
     # @return [Aldine::Utils::BundleConfig]
