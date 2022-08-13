@@ -80,24 +80,39 @@ class Aldine::Local::Docker::RakeRunner
     !default_rakefile_for(path).nil?
   end
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-
   # @return [String, nil]
   def default_rakefile_for(path)
     store = self.memo[:default_rakefile] ||= {}
 
-    unless store.key?(path)
-      store[path] = lambda do
+    {
+      true => -> { store[path] },
+      false => lambda do
         default_rakefiles
-          .map { |filename| Pathname.new(path).join(filename) }
-          .map { |fp| ['test', '-f', fp.relative_path_from(path).to_path] }
-          .keep_if { |command| runner.call(command, path: path, exception: false, silent: true).success? }
-          .map(&:last) # get command parameter filepath
-          .first
-      end.call
-    end
-
-    store[path]
+          .map { |filename| rakefile_check(path, filename).call }
+          .compact.first
+      end
+    }.then { |retrievers| store[path] = retrievers[store.key?(path)].call }
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
+  # Build a checker checking given file in given path (in a docker context).
+  #
+  # Result of the check is ``nill`` when file does not exist, filepath otherwise.
+  #
+  # @param [String] path
+  # @param [String] filename
+  #
+  # @return [Proc]
+  def rakefile_check(path, filename)
+    Pathname
+      .new(path)
+      .join(filename)
+      .then { |fp| ['test', '-f', fp.relative_path_from(path).to_path] }
+      # @formatter:off
+      .then do |command|
+        lambda do
+          runner.call(command, path: path, exception: false, silent: true).success? ? command.last : nil
+        end
+      end
+    # @formatter:on
+  end
 end
