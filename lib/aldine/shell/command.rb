@@ -23,15 +23,16 @@ class Aldine::Shell::Command
   # @param [Hash{ String => String }] env
   def initialize(arguments, env: {})
     super().tap do
-      @silent = @silent.nil? ? false : @silent
       @arguments = arguments.clone.map(&:freeze).freeze
       @env = env.clone.map { |k, v| [k.freeze, v.freeze] }.to_h.freeze
+
+      self.silent = @silent.nil? ? false : @silent
     end
   end
 
   # @return [Boolean]
   def silent?
-    !!@silent
+    !!self.silent
   end
 
   # @return [Array<String>]
@@ -71,6 +72,9 @@ class Aldine::Shell::Command
 
   # @return [Array<String>]
   attr_reader :arguments
+
+  # @return [Boolean]
+  attr_accessor :silent
 
   def system_args
     [env, *self.to_a]

@@ -107,7 +107,7 @@ module Aldine::Local::Docker
     # @param [Struct] user
     #
     # @return [Process::Status]
-    def execute(command = [], user:, path: nil, exception: true)
+    def execute(command = [], user:, path: nil, exception: true, silent: false)
       [
         '/usr/bin/env', 'docker', 'run', '--rm',
         shell.tty? ? '-it' : nil,
@@ -128,7 +128,7 @@ module Aldine::Local::Docker
       ]
         .compact
         .concat(command)
-        .then { |params| shell.sh(*params, exception: exception) }
+        .then { |params| shell.sh(*params, exception: exception, silent: silent) }
     end
 
     # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
