@@ -4,7 +4,7 @@ autoload(:Pathname, 'pathname')
 require 'bundler/setup'
 require 'aldine'
 # load tasks --------------------------------------------------------
-Pathname.new(__FILE__)
+Pathname.new(Dir.pwd)
         .dirname
         .join('rake')
         .glob('/tasks/**/*.rb')

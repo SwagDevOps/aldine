@@ -10,6 +10,8 @@
 
 require_relative '../local'
 
+# rubocop:disable Metrics/ModuleLength
+
 # Local to docker communication methods.
 module Aldine::Local::Docker
   autoload(:Pathname, 'pathname')
@@ -78,7 +80,9 @@ module Aldine::Local::Docker
     #
     # @return [Process::Status]
     def rake(task, path: nil)
-      rake_runner.call(task.to_s, path: path)
+      around_execute do
+        rake_runner.call(task.to_s, path: path)
+      end
     end
 
     protected
@@ -103,7 +107,7 @@ module Aldine::Local::Docker
     # @param [Struct] user
     #
     # @return [Process::Status]
-    def execute(command = [], user:, path: nil)
+    def execute(command = [], user:, path: nil, exception: true)
       [
         '/usr/bin/env', 'docker', 'run', '--rm',
         shell.tty? ? '-it' : nil,
@@ -119,13 +123,12 @@ module Aldine::Local::Docker
         '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}",
         '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
         '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
-        '-v', "#{::Aldine::Remote::RESOURCES_DIR.join('rake/Rakefile').realpath}:#{workdir.join('src/Rakefile')}:ro",
         '-w', workdir.join(path.to_s).to_path,
         image
       ]
         .compact
         .concat(command)
-        .then { |params| shell.sh(*params) }
+        .then { |params| shell.sh(*params, exception: exception) }
     end
 
     # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
@@ -165,7 +168,9 @@ module Aldine::Local::Docker
     # @return [Aldine::Local::Docker::RakeRunner]
     def rake_runner
       lambda do |command, **options|
-        self.run(command, **options)
+        self.execute(command, **{
+          user: self.user
+        }.merge(options))
       end.then do |runner|
         ::Aldine::Local::Docker::RakeRunner.new(runner)
       end
@@ -186,3 +191,4 @@ module Aldine::Local::Docker
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength

@@ -17,8 +17,8 @@ module Aldine::Local::Shell
 
   class << self
     # @return [Process::Status]
-    def sh(*arguments)
-      ::Aldine::Shell::Command.new(arguments).call
+    def sh(*arguments, exception: true)
+      ::Aldine::Shell::Command.new(arguments).call(exception: exception)
     end
 
     # @return [Boolean]
