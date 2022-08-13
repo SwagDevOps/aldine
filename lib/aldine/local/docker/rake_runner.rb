@@ -80,6 +80,8 @@ class Aldine::Local::Docker::RakeRunner
     !default_rakefile_for(path).nil?
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+
   # @return [String, nil]
   def default_rakefile_for(path)
     store = self.memo[:default_rakefile] ||= {}
@@ -89,12 +91,13 @@ class Aldine::Local::Docker::RakeRunner
         default_rakefiles
           .map { |filename| Pathname.new(path).join(filename) }
           .map { |fp| ['test', '-f', fp.relative_path_from(path).to_path] }
-          .keep_if { |command| runner.call(command, path: path, exception: false).success? }
-          .map { |command| command.last } # get command parameter filepath
+          .keep_if { |command| runner.call(command, path: path, exception: false, silent: true).success? }
+          .map(&:last) # get command parameter filepath
           .first
       end.call
     end
 
     store[path]
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 end
