@@ -35,6 +35,10 @@ class Aldine::Local::Docker::EnvFile
       .to_h
   end
 
+  def fetch(...)
+    to_h.fetch(...)
+  end
+
   # Env parameters for docker command.
   #
   # @see Aldine::Local::Docker
