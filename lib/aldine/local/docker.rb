@@ -118,7 +118,7 @@ module Aldine::Local::Docker
         '-e', "OUTPUT_NAME=#{tex.output_name}",
         '-e', "TMPDIR=#{tmpdir.remote}",
         '-v', "#{tmpdir.local.realpath}:#{tmpdir.remote}",
-        '-v', "#{tmpdir.local.join('.sys/bundle/home').realpath}:#{env_file.parse.fetch('BUNDLE_USER_HOME')}",
+        '-v', "#{tmpdir.local.join('.sys/bundle/home').realpath}:#{env_file.fetch('BUNDLE_USER_HOME')}",
         '-v', "#{tmpdir.local.join('.sys/bundle/pack').realpath}:#{workdir.join(bundle_basedir)}",
         '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
@@ -141,7 +141,9 @@ module Aldine::Local::Docker
     #
     # @return [Pathname
     def workdir
-      '/workdir'.then { |path| Pathname.new(path) }
+      env_file
+        .fetch('WORKDIR')
+        .then { |path| Pathname.new(path) }
     end
 
     # Get an object representation of the ``tmpdir`` with local and remote paths.
@@ -172,7 +174,8 @@ module Aldine::Local::Docker
         BUNDLE_USER_HOME: '/tmp/bundle',
         TERM: ENV.fetch('TERM', 'xterm'),
         OUTPUT_NAME: tex.output_name,
-        TMPDIR: tmpdir.remote
+        TMPDIR: tmpdir.remote,
+        WORKDIR: '/workdir',
       }.then { |defaults| ::Aldine::Local::Docker::EnvFile.new(defaults: defaults) }
     end
 
