@@ -10,7 +10,7 @@
 
 require_relative '../docker'
 
-# Warpper built around rake execution.
+# Wrapper built around rake execution.
 class Aldine::Local::Docker::RakeRunner
   autoload(:Pathname, 'pathname')
 
