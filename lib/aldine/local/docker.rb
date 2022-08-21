@@ -10,9 +10,17 @@
 
 require_relative '../local'
 
+# rubocop:disable Metrics/ModuleLength
+
 # Local to docker communication methods.
 module Aldine::Local::Docker
   autoload(:Pathname, 'pathname')
+
+  Pathname.new(__FILE__.gsub(/\.rb$/, '')).realpath.tap do |path|
+    {
+      RakeRunner: 'rake_runner',
+    }.each { |k, v| autoload(k, "#{path}/#{v}") }
+  end
 
   class << self
     # Get current UNIX user.
@@ -72,7 +80,9 @@ module Aldine::Local::Docker
     #
     # @return [Process::Status]
     def rake(task, path: nil)
-      run(%w[bundle exec rake].concat([task.to_s]), path: path)
+      around_execute do
+        rake_runner.call(task.to_s, path: path)
+      end
     end
 
     protected
@@ -97,7 +107,7 @@ module Aldine::Local::Docker
     # @param [Struct] user
     #
     # @return [Process::Status]
-    def execute(command = [], user:, path: nil)
+    def execute(command = [], user:, path: nil, exception: true, silent: false)
       [
         '/usr/bin/env', 'docker', 'run', '--rm',
         shell.tty? ? '-it' : nil,
@@ -110,7 +120,7 @@ module Aldine::Local::Docker
         '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
         '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
-        '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}:ro",
+        '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}",
         '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
         '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
         '-w', workdir.join(path.to_s).to_path,
@@ -118,7 +128,7 @@ module Aldine::Local::Docker
       ]
         .compact
         .concat(command)
-        .then { |params| shell.sh(*params) }
+        .then { |params| shell.sh(*params, exception: exception, silent: silent) }
     end
 
     # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
@@ -153,6 +163,19 @@ module Aldine::Local::Docker
       ::Aldine::Local::Tex
     end
 
+    # @see #rake()
+    #
+    # @return [Aldine::Local::Docker::RakeRunner]
+    def rake_runner
+      lambda do |command, **options|
+        self.execute(command, **{
+          user: self.user
+        }.merge(options))
+      end.then do |runner|
+        ::Aldine::Local::Docker::RakeRunner.new(runner)
+      end
+    end
+
     # @return [Aldine::Utils::BundleConfig]
     def bundle_config
       shell.pwd.then do |basedir|
@@ -168,3 +191,4 @@ module Aldine::Local::Docker
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength
