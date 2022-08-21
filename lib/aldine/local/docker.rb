@@ -129,7 +129,7 @@ module Aldine::Local::Docker
         '-w', workdir.join(path.to_s).to_path,
       ]
         .compact
-        .concat(env_file)
+        .concat(env_file.to_a)
         .concat([image])
         .concat(command)
         .then { |params| shell.sh(*params, exception: exception, silent: silent) }
@@ -139,11 +139,9 @@ module Aldine::Local::Docker
 
     # Get workdir used inside docker container.
     #
-    # @return [Pathname
+    # @return [Pathname]
     def workdir
-      env_file
-        .fetch('WORKDIR')
-        .then { |path| Pathname.new(path) }
+      Pathname.new(env_file.fetch('WORKDIR'))
     end
 
     # Get an object representation of the ``tmpdir`` with local and remote paths.
@@ -161,14 +159,17 @@ module Aldine::Local::Docker
       shell.fs(**kwargs)
     end
 
+    # @return [Module<::Aldine::Local::Shell>]
     def shell
       ::Aldine::Local::Shell
     end
 
+    # @return [Module<::Aldine::Local::Tex>]
     def tex
       ::Aldine::Local::Tex
     end
 
+    # @return [::Aldine::Local::Docker::EnvFile]
     def env_file
       {
         BUNDLE_USER_HOME: '/tmp/bundle',
@@ -181,7 +182,7 @@ module Aldine::Local::Docker
 
     # @see #rake()
     #
-    # @return [Aldine::Local::Docker::RakeRunner]
+    # @return [::Aldine::Local::Docker::RakeRunner]
     def rake_runner
       lambda do |command, **options|
         self.execute(command, **{
@@ -192,7 +193,7 @@ module Aldine::Local::Docker
       end
     end
 
-    # @return [Aldine::Utils::BundleConfig]
+    # @return [::Aldine::Utils::BundleConfig]
     def bundle_config
       shell.pwd.then do |basedir|
         ::Aldine::Utils::BundleConfig.new(basedir)
