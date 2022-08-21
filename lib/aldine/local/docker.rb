@@ -45,7 +45,7 @@ module Aldine::Local::Docker
     # @return [Array<String>]
     def directories
       %w[out src tmp] # tex directories
-        .concat(%w[pack conf].map { |dir| ".tmp/.sys/bundle/#{dir}" }) # bundle vendoring + config
+        .concat(%w[pack conf home].map { |dir| ".tmp/.sys/bundle/#{dir}" }) # bundle vendoring + config + home
         .sort
         .freeze
     end
@@ -96,6 +96,7 @@ module Aldine::Local::Docker
         directories.each { |dir| fs.mkdir_p(dir) }
 
         fs.cp(bundle_config.realpath, tmpdir.local.realpath.join('.sys/bundle/conf'))
+        fs.rm_rf(tmpdir.local.join('.sys/bundle/home/config')) # ensure config is not present in home
       end.then { execute_stt.call }
     end
 
@@ -117,6 +118,7 @@ module Aldine::Local::Docker
         '-e', "OUTPUT_NAME=#{tex.output_name}",
         '-e', "TMPDIR=#{tmpdir.remote}",
         '-v', "#{tmpdir.local.realpath}:#{tmpdir.remote}",
+        '-v', "#{tmpdir.local.join('.sys/bundle/home').realpath}:#{env_file.parse.fetch('BUNDLE_USER_HOME')}",
         '-v', "#{tmpdir.local.join('.sys/bundle/pack').realpath}:#{workdir.join(bundle_basedir)}",
         '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
@@ -167,6 +169,7 @@ module Aldine::Local::Docker
 
     def env_file
       {
+        BUNDLE_USER_HOME: '/tmp/bundle',
         TERM: ENV.fetch('TERM', 'xterm'),
         OUTPUT_NAME: tex.output_name,
         TMPDIR: tmpdir.remote

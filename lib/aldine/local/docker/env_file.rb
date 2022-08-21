@@ -26,7 +26,13 @@ class Aldine::Local::Docker::EnvFile
 
   # @return {Hash{String => String}}
   def parse
-    Dotenv.parse(file.to_path).to_h.map { |k, v| [k.to_s, v.to_s] }.to_h
+    Dotenv
+      .parse(file.to_path)
+      .map { |k, v| [k.to_s, v.to_s] }
+      .to_h
+      .then { |parsed| defaults.merge(parsed) }
+      .sort
+      .to_h
   end
 
   # Env parameters for docker command.
@@ -36,17 +42,15 @@ class Aldine::Local::Docker::EnvFile
   # @return [Array<String>]
   def arguments
     [].tap do |result|
-      (defaults || {})
-        .transform_keys(&:to_s)
-        .merge(self.parse)
-        .sort
-        .to_h
+      parse
         .map { |k, v| ['-e', "#{k}=#{v}"] }
         .each { |args| result.concat(args) }
     end
   end
 
   alias to_ary arguments
+
+  alias to_h parse
 
   alias to_hash parse
 
