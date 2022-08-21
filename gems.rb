@@ -16,6 +16,7 @@ end
 
 group :default do
   gem 'clamp', '~> 1.3'
+  gem 'dotenv', '~> 2.8'
   gem 'faker', '~> 2.21'
   gem 'kamaze-version', '~> 1.0'
   gem 'rouge', '~> 3.29'
