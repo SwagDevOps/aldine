@@ -18,6 +18,7 @@ module Aldine::Local::Docker
 
   Pathname.new(__FILE__.gsub(/\.rb$/, '')).realpath.tap do |path|
     {
+      EnvFile: 'env_file',
       RakeRunner: 'rake_runner',
     }.each { |k, v| autoload(k, "#{path}/#{v}") }
   end
@@ -124,9 +125,10 @@ module Aldine::Local::Docker
         '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
         '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
         '-w', workdir.join(path.to_s).to_path,
-        image
       ]
         .compact
+        .concat(env_file)
+        .concat([image])
         .concat(command)
         .then { |params| shell.sh(*params, exception: exception, silent: silent) }
     end
@@ -161,6 +163,14 @@ module Aldine::Local::Docker
 
     def tex
       ::Aldine::Local::Tex
+    end
+
+    def env_file
+      {
+        TERM: ENV.fetch('TERM', 'xterm'),
+        OUTPUT_NAME: tex.output_name,
+        TMPDIR: tmpdir.remote
+      }.then { |defaults| ::Aldine::Local::Docker::EnvFile.new(defaults: defaults) }
     end
 
     # @see #rake()
