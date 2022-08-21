@@ -19,6 +19,10 @@ class Aldine::Local::Docker::EnvFile
   autoload(:Dotenv, 'dotenv')
   autoload(:Pathname, 'pathname')
 
+  # Initialize an env-file parser.
+  #
+  # @param [String, nil] file File to be parsed
+  # @param [Hash{String => String}] defaults Default values for missing env variables.
   def initialize(file = nil, defaults: {})
     self.file = file
     self.defaults = (defaults || {}).transform_keys(&:to_s)
@@ -53,6 +57,8 @@ class Aldine::Local::Docker::EnvFile
   end
 
   alias to_ary arguments
+
+  alias to_a arguments
 
   alias to_h parse
 
