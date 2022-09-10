@@ -24,19 +24,21 @@ class Aldine::Local::Docker::EnvFile
   # @param [String, nil] file File to be parsed
   # @param [Hash{String => String}] defaults Default values for missing env variables.
   def initialize(file = nil, defaults: {})
+    self.env = ENV.to_h.freeze
     self.file = file
     self.defaults = (defaults || {}).transform_keys(&:to_s)
   end
 
-  # @return {Hash{String => String}}
+  # Read, parse and mix current environment varaibles with the declarations found in the envfile.
+  #
+  # Environment variables have higher priority on variables defined in the env-file.
+  #
+  # @return [Hash{String => String}]
   def parse
-    Dotenv
-      .parse(file.to_path)
-      .map { |k, v| [k.to_s, v.to_s] }
-      .to_h
-      .then { |parsed| defaults.merge(parsed) }
-      .sort
-      .to_h
+    read.then do |parsed|
+      env.keep_if { |key, _| parsed.keys.include?(key) }
+         .then { |env| parsed.merge(env) }
+    end
   end
 
   def fetch(...)
@@ -71,6 +73,9 @@ class Aldine::Local::Docker::EnvFile
 
   protected
 
+  # @type [Hash{String => String}]
+  attr_writer :env
+
   # File read.
   #
   # @return [Pathname]
@@ -80,6 +85,24 @@ class Aldine::Local::Docker::EnvFile
   #
   # @return [Hash{String => String}]
   attr_accessor :defaults
+
+  # Read the envfile.
+  #
+  # @return [Hash{String => String}]
+  def read
+    Dotenv
+      .parse(file.to_path)
+      .map { |k, v| [k.to_s, v.to_s] }
+      .to_h
+      .then { |parsed| defaults.merge(parsed) }
+      .sort
+      .to_h
+  end
+
+  # @return [Hash{String => String}]
+  def env
+    @env.dup
+  end
 
   # @api private
   #
