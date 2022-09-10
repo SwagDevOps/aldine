@@ -52,6 +52,7 @@ Gem::Specification.new do |s|
     "lib/aldine/local.rb",
     "lib/aldine/local/config.rb",
     "lib/aldine/local/docker.rb",
+    "lib/aldine/local/docker/env_file.rb",
     "lib/aldine/local/docker/rake_runner.rb",
     "lib/aldine/local/shell.rb",
     "lib/aldine/local/tasks.rb",
