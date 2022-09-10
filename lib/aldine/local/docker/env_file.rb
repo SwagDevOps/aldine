@@ -12,7 +12,8 @@ require_relative '../docker'
 
 # Envfile for the docker environment.
 #
-# Variables are set on the command line.
+# Variables are read from envfile ``docker.env``
+# and passed through the command line of the docker process.
 #
 # @see Aldine::Local::Docker
 class Aldine::Local::Docker::EnvFile
