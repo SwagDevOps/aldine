@@ -13,7 +13,9 @@
 # The default task is to generate TeX output files.
 # Tasks strictly relating to LaTeX live in the ``tex`` namespace.
 
-require_relative('../local').then { require 'rake' }
+require_relative('../local').then do
+  ::Aldine.dotenv { require 'rake' }
+end
 
 autoload(:Bundler, 'bundler')
 autoload(:FileUtils, 'fileutils')
