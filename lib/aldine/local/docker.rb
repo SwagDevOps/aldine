@@ -177,7 +177,9 @@ module Aldine::Local::Docker
         OUTPUT_NAME: tex.output_name,
         TMPDIR: tmpdir.remote,
         WORKDIR: '/workdir',
-      }.then { |defaults| ::Aldine::Local::Docker::EnvFile.new(defaults: defaults) }
+      }
+        .tap { ::Aldine.dotenv } # load dotnv before env_file evaluation
+        .then { |defaults| ::Aldine::Local::Docker::EnvFile.new(defaults: defaults) }
     end
 
     # @see #rake()
