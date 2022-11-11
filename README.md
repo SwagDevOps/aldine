@@ -16,12 +16,3 @@ bundle install --standalone
 require 'bundler/setup'
 require 'aldine/local/tasks'
 ```
-
-### ``./src/Rakefile``
-
-```ruby
-# frozen_string_literal: true
-
-require 'bundler/setup'
-require 'aldine/remote/tasks'
-```
