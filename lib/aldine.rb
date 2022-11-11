@@ -37,4 +37,23 @@ module Aldine
       f.call unless self.constants(false).include?(:VERSION)
     end
   end
+
+  class << self
+    ENV_FILES = %w[.env.local .env].freeze
+
+    # Load environment variables from ``.env`` file into ``ENV``.
+    #
+    # @param [Array<String>|nil] files
+    #
+    # @return [Hash{String => String}]
+    def dotenv(files = nil, &block)
+      require 'dotenv'
+      require 'dotenv_validator'
+
+      # noinspection RubyResolve
+      ::Dotenv.load(*(files || ENV_FILES))
+              .tap { ::DotenvValidator.check! }
+              .tap { block&.call }
+    end
+  end
 end
