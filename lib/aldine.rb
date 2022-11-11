@@ -39,6 +39,7 @@ module Aldine
   end
 
   class << self
+    # @api private
     ENV_FILES = %w[.env.local .env].freeze
 
     # Load environment variables from ``.env`` file into ``ENV``.
