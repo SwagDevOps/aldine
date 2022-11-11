@@ -16,3 +16,22 @@ bundle install --standalone
 require 'bundler/setup'
 require 'aldine/local/tasks'
 ```
+
+## Environment 
+
+The following files are loaded as [``dotenv``][bkeepers/dotenv] files:
+
+* ``.env.local``
+* ``.env``
+
+The file ``.env.sample`` is used to perform [environment validation][fastruby/dotenv_validator].
+
+See also:
+* [Dotenv][bkeepers/dotenv]
+* [Dotenv Validator][fastruby/dotenv_validator]
+
+
+<!-- hypelinks -->
+
+[bkeepers/dotenv]: https://github.com/bkeepers/dotenv
+[fastruby/dotenv_validator]: https://github.com/fastruby/dotenv_validator
