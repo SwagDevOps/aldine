@@ -13,6 +13,7 @@ require 'kamaze/project'
   'misc:gitignore',
   'shell',
   'sources:license',
+  'version:edit',
 ].then do |tasks|
   Kamaze.project do |project|
     project.subject = Aldine
