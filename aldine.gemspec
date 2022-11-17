@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
     "aldine",
   ]
   s.files         = [
+    ".env.sample",
     ".yardopts",
     "README.md",
     "bin/aldine",
@@ -49,6 +50,7 @@ Gem::Specification.new do |s|
     "lib/aldine/cli/commands/shared/files_matcher.rb",
     "lib/aldine/cli/commands/shared/svg_conv.rb",
     "lib/aldine/cli/commands/svg_conv_command.rb",
+    "lib/aldine/dotenv_loader.rb",
     "lib/aldine/local.rb",
     "lib/aldine/local/config.rb",
     "lib/aldine/local/docker.rb",

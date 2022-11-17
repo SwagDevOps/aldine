@@ -4,6 +4,7 @@
 # rubocop:disable all
 <?rb
 @files = [
+    '.env.sample',
     '.yardopts',
     'README.md',
     'bin/*',

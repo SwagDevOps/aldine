@@ -20,6 +20,7 @@ module Aldine
     {
       Bundleable: :bundleable,
       Cli: :cli,
+      DotenvLoader: :dotenv_loader,
       Local: :local,
       Remote: :remote,
       Shell: :shell,
@@ -39,22 +40,15 @@ module Aldine
   end
 
   class << self
-    # @api private
-    ENV_FILES = %w[.env.local .env .env.sample].freeze
-
     # Load environment variables from ``.env`` file into ``ENV``.
     #
     # @param [Array<String>|nil] files
     #
     # @return [Hash{String => String}]
     def dotenv(files = nil, &block)
-      require 'dotenv'
-      require 'dotenv_validator'
-
-      # noinspection RubyResolve
-      ::Dotenv.load(*(files || ENV_FILES))
-              .tap { ::DotenvValidator.check! }
-              .tap { block&.call }
+      Pathname.new(__FILE__).dirname.join('..').realpath.then do |path|
+        DotenvLoader.new(path, files).call(&block)
+      end
     end
   end
 end

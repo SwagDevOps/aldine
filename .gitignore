@@ -9,6 +9,7 @@
 /vendor/
 !/.codeclimate.yml
 !/.env
+!/.env.sample
 !/.gitignore
 !/.rspec
 !/.rubocop.yml
