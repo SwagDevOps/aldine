@@ -20,6 +20,9 @@ class Aldine::Local::Docker::EnvFile
   autoload(:Dotenv, 'dotenv')
   autoload(:Pathname, 'pathname')
 
+  # @api private
+  ENV_FILE_NAME = 'container.env'
+
   # Initialize an env-file parser.
   #
   # @param [String, nil] file File to be parsed
@@ -29,10 +32,15 @@ class Aldine::Local::Docker::EnvFile
     self.defaults = (defaults || {}).transform_keys(&:to_s)
   end
 
+  # @return [Array<Pathname>]
+  def files
+    [file, fallback_file]
+  end
+
   # @return {Hash{String => String}}
   def parse
     Dotenv
-      .parse(file.to_path)
+      .parse(*files.map(&:to_s).uniq)
       .map { |k, v| [k.to_s, v.to_s] }
       .to_h
       .then { |parsed| defaults.merge(parsed) }
@@ -96,6 +104,10 @@ class Aldine::Local::Docker::EnvFile
   #
   # @return [Pathname]
   def default_file
-    Pathname.new(Dir.pwd).join('docker.env')
+    Pathname.new(Dir.pwd).join(ENV_FILE_NAME)
+  end
+
+  def fallback_file
+    ::Aldine::Local::RESOURCES_DIR.join(ENV_FILE_NAME)
   end
 end
