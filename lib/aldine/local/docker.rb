@@ -178,7 +178,7 @@ module Aldine::Local::Docker
         TMPDIR: tmpdir.remote,
         WORKDIR: '/workdir',
       }
-        .tap { ::Aldine.dotenv } # load dotnv before env_file evaluation
+        .tap { ::Aldine.dotenv } # load dotenv before env_file evaluation
         .then { |defaults| ::Aldine::Local::Docker::EnvFile.new(defaults: defaults) }
     end
 
