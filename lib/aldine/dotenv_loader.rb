@@ -10,8 +10,9 @@
 
 require_relative '../aldine'
 
-# Load dotenv files + add validation
+# Load dotenv files + add validations
 #
+# @see https://github.com/bkeepers/dotenv
 # @see https://github.com/fastruby/dotenv_validator
 class Aldine::DotenvLoader
   autoload(:Pathname, 'pathname')
@@ -22,6 +23,7 @@ class Aldine::DotenvLoader
   # @return [Pathname]
   attr_reader :base_dir
 
+  # @param [String, Pathname] base_dir
   # @param [Array<String>|nil] files
   def initialize(base_dir, files = nil)
     self.base_dir = Pathname.new(base_dir).realpath
@@ -34,7 +36,8 @@ class Aldine::DotenvLoader
   def call(&block)
     # noinspection RubyResolve,RubyMismatchedReturnType
     dotenv.load(*self.files).tap do
-      validator.check!
+      validator(root_dir: base_dir).check!
+      validator.check! if base_dir != sample.dirname
       block&.call
     end
   end
@@ -55,9 +58,16 @@ class Aldine::DotenvLoader
 
   attr_writer :base_dir
 
+  # @param [String, Pathname, nil] root_dir
+  #
   # @return [Module<DotenvValidator>]
-  def validator
-    (require 'dotenv_validator').then { ::DotenvValidator }
+  def validator(root_dir: nil)
+    (require 'dotenv_validator').then do
+      ::DotenvValidator.tap do |klass|
+        # @see https://github.com/fastruby/dotenv_validator/blob/1d71e8f15ad6c55b0cc3966b58ceda4332ce8059/lib/dotenv_validator.rb#L141
+        klass.singleton_class.__send__(:define_method, :root) { Pathname.new(root_dir || Dir.pwd) }
+      end
+    end
   end
 
   # @return [Module<Dotenv>]
