@@ -10,16 +10,15 @@
 
 require_relative '../local'
 
-# rubocop:disable Metrics/ModuleLength
-
 # Local to docker communication methods.
 module Aldine::Local::Docker
   autoload(:Pathname, 'pathname')
 
-  Pathname.new(__FILE__.gsub(/\.rb$/, '')).realpath.tap do |path|
+  __FILE__.gsub(/\.rb$/, '').tap do |path|
     {
-      EnvFile: 'env_file',
-      RakeRunner: 'rake_runner',
+      Command: :command,
+      EnvFile: :env_file,
+      RakeRunner: :rake_runner,
     }.each { |k, v| autoload(k, "#{path}/#{v}") }
   end
 
@@ -102,8 +101,6 @@ module Aldine::Local::Docker
       end.then { execute_stt.call }
     end
 
-    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-
     # Executes given command in a container.
     #
     # @param [Array<String>] command
@@ -112,32 +109,19 @@ module Aldine::Local::Docker
     #
     # @return [Process::Status]
     def execute(command = [], user:, path: nil, exception: true, silent: false)
-      [
-        '/usr/bin/env', 'docker', 'run', '--rm',
-        shell.tty? ? '-it' : nil,
-        '-u', [user.uid, user.gid].join(':'),
-        '-e', "TERM=#{ENV.fetch('TERM', 'xterm')}",
-        '-e', "TMPDIR=#{tmpdir.remote}",
-        '-v', "#{tmpdir.local.realpath}:#{tmpdir.remote}",
-        '-v', "#{tmpdir.local.join('.sys/bundle/home').realpath}:#{env_file.fetch('BUNDLE_USER_HOME')}",
-        '-v', "#{tmpdir.local.join('.sys/bundle/pack').realpath}:#{workdir.join(bundle_basedir)}",
-        '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
-        '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
-        '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
-      ]
-        .concat(settings.get('directories')
-                        .values
-                        .map { |directory| ['-v', "#{shell.pwd.join(directory).realpath}:#{workdir.join(directory)}"] }
-                        .flatten)
-        .concat(['-w', workdir.join(path.to_s).to_path])
-        .compact
-        .concat(env_file.to_a)
-        .concat([image])
+      command_for(user: user, path: path)
+        .to_a
         .concat(command)
         .then { |params| shell.sh(*params, exception: exception, silent: silent) }
     end
 
-    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+    # @param [String, nil] path
+    # @param [Struct] user
+    #
+    # @return [Command]
+    def command_for(user:, path: nil)
+      Command.new(image: image, env_file: env_file, user: user, tmpdir: tmpdir, workdir: workdir, path: path)
+    end
 
     # Get workdir used inside docker container.
     #
@@ -204,13 +188,5 @@ module Aldine::Local::Docker
         ::Aldine::Utils::BundleConfig.new(basedir)
       end
     end
-
-    # @return [String]
-    def bundle_basedir
-      shell.pwd.then do |basedir|
-        bundle_config.bundle_basedir.relative_path_from(basedir).to_path
-      end
-    end
   end
 end
-# rubocop:enable Metrics/ModuleLength
