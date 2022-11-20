@@ -50,6 +50,10 @@ Gem::Specification.new do |s|
     "lib/aldine/cli/commands/shared/files_matcher.rb",
     "lib/aldine/cli/commands/shared/svg_conv.rb",
     "lib/aldine/cli/commands/svg_conv_command.rb",
+    "lib/aldine/concerns.rb",
+    "lib/aldine/concerns/freezable.rb",
+    "lib/aldine/concerns/freezer.rb",
+    "lib/aldine/concerns/settings_aware.rb",
     "lib/aldine/dotenv_loader.rb",
     "lib/aldine/local.rb",
     "lib/aldine/local/config.rb",
@@ -67,6 +71,9 @@ Gem::Specification.new do |s|
     "lib/aldine/remote/pdf_builder.rb",
     "lib/aldine/remote/synchro.rb",
     "lib/aldine/remote/tasks.rb",
+    "lib/aldine/settings.rb",
+    "lib/aldine/settings/parsed.rb",
+    "lib/aldine/settings/parser.rb",
     "lib/aldine/shell.rb",
     "lib/aldine/shell/chalk.rb",
     "lib/aldine/shell/command.rb",
@@ -81,6 +88,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency("dotenv", ["~> 2.8"])
   s.add_runtime_dependency("dotenv_validator", ["~> 1.2"])
   s.add_runtime_dependency("faker", ["~> 2.21"])
+  s.add_runtime_dependency("ice_nine", [">= 0"])
   s.add_runtime_dependency("kamaze-version", ["~> 1.0"])
   s.add_runtime_dependency("rouge", ["~> 3.29"])
   s.add_runtime_dependency("stibium-bundled", ["~> 0.0", ">= 0.0.4"])

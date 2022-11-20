@@ -8,24 +8,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../local'
+require_relative '../settings'
 
-# Tex project related methods.
-module Aldine::Local::Tex
-  class << self
-    include(::Aldine::Concerns::SettingsAware)
+# Hash featuring autovivification and ``deep_freeze``.
+class Aldine::Settings::Parsed < ::Hash
+  include(::Aldine::Concerns::Freezable)
 
-    # @return [String]
-    def project_name
-      settings.get('output_name').tap do |value|
-        if value.to_s.empty?
-          # rubocop:disable Style/RedundantException
-          raise RuntimeError, 'Output name can not be nil'
-          # rubocop:enable Style/RedundantException
-        end
-      end.to_s
-    end
-
-    alias output_name project_name
+  def initialize
+    super() { |h, k| h[k] = h.dup.clear }
   end
 end

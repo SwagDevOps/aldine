@@ -19,6 +19,7 @@ group :default do
   gem 'dotenv', '~> 2.8'
   gem 'dotenv_validator', '~> 1.2'
   gem 'faker', '~> 2.21'
+  gem 'ice_nine'
   gem 'kamaze-version', '~> 1.0'
   gem 'rouge', '~> 3.29'
   gem 'stibium-bundled', '~> 0.0', '>= 0.0.4'

@@ -24,6 +24,8 @@ module Aldine::Local::Docker
   end
 
   class << self
+    include(::Aldine::Concerns::SettingsAware)
+
     # Get current UNIX user.
     #
     # @see https://ruby-doc.org/stdlib-2.5.3/libdoc/etc/rdoc/Etc.html#method-c-getpwnam
@@ -115,7 +117,6 @@ module Aldine::Local::Docker
         shell.tty? ? '-it' : nil,
         '-u', [user.uid, user.gid].join(':'),
         '-e', "TERM=#{ENV.fetch('TERM', 'xterm')}",
-        '-e', "OUTPUT_NAME=#{tex.output_name}",
         '-e', "TMPDIR=#{tmpdir.remote}",
         '-v', "#{tmpdir.local.realpath}:#{tmpdir.remote}",
         '-v', "#{tmpdir.local.join('.sys/bundle/home').realpath}:#{env_file.fetch('BUNDLE_USER_HOME')}",
@@ -123,11 +124,12 @@ module Aldine::Local::Docker
         '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
         '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
         '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
-        '-v', "#{shell.pwd.join('src').realpath}:#{workdir.join('src')}",
-        '-v', "#{shell.pwd.join('out').realpath}:#{workdir.join('out')}",
-        '-v', "#{shell.pwd.join('tmp').realpath}:#{workdir.join('tmp')}",
-        '-w', workdir.join(path.to_s).to_path,
       ]
+        .concat(settings.get('directories')
+                        .values
+                        .map { |directory| ['-v', "#{shell.pwd.join(directory).realpath}:#{workdir.join(directory)}"] }
+                        .flatten)
+        .concat(['-w', workdir.join(path.to_s).to_path])
         .compact
         .concat(env_file.to_a)
         .concat([image])
@@ -171,15 +173,16 @@ module Aldine::Local::Docker
 
     # @return [::Aldine::Local::Docker::EnvFile]
     def env_file
-      {
-        BUNDLE_USER_HOME: '/tmp/bundle',
-        TERM: ENV.fetch('TERM', 'xterm'),
-        OUTPUT_NAME: tex.output_name,
-        TMPDIR: tmpdir.remote,
-        WORKDIR: '/workdir',
-      }
-        .tap { ::Aldine.dotenv } # load dotenv before env_file evaluation
-        .then { |defaults| ::Aldine::Local::Docker::EnvFile.new(defaults: defaults) }
+      ::Aldine.dotenv.then do
+        {
+          BUNDLE_USER_HOME: '/tmp/bundle',
+          TERM: ENV.fetch('TERM', 'xterm'),
+          TMPDIR: tmpdir.remote,
+          WORKDIR: settings.get('container.workdir'),
+        }.then do |defaults|
+          ::Aldine::Local::Docker::EnvFile.new(defaults: defaults)
+        end
+      end
     end
 
     # @see #rake()

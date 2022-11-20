@@ -26,7 +26,7 @@ class Aldine::Local::Docker::EnvFile
   # Initialize an env-file parser.
   #
   # @param [String, nil] file File to be parsed
-  # @param [Hash{String => String}] defaults Default values for missing env variables.
+  # @param [Hash{String, Symbol => String}] defaults Default values for missing env variables.
   def initialize(file = nil, defaults: {})
     self.file = file
     self.defaults = (defaults || {}).transform_keys(&:to_s)

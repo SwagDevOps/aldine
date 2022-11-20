@@ -20,9 +20,11 @@ module Aldine
     {
       Bundleable: :bundleable,
       Cli: :cli,
+      Concerns: :concerns,
       DotenvLoader: :dotenv_loader,
       Local: :local,
       Remote: :remote,
+      Settings: :settings,
       Shell: :shell,
       Utils: :utils,
     }.each { |k, v| autoload(k, libdir.join(v.to_s)) }
@@ -40,14 +42,17 @@ module Aldine
   end
 
   class << self
+    # @return [Settings]
+    def settings
+      Settings.instance
+    end
+
     # Load environment variables from ``.env`` file into ``ENV``.
     #
-    # @param [Array<String>|nil] files
-    #
     # @return [Hash{String => String}]
-    def dotenv(files = nil, &block)
+    def dotenv(&block)
       Pathname.new(__FILE__).dirname.join('..').realpath.then do |path|
-        DotenvLoader.new(path, files).call(&block)
+        DotenvLoader.new(path).call(&block)
       end
     end
   end

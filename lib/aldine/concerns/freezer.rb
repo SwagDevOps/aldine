@@ -8,24 +8,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../local'
+require_relative '../concerns'
 
-# Tex project related methods.
-module Aldine::Local::Tex
-  class << self
-    include(::Aldine::Concerns::SettingsAware)
+# Provides ``deep_freeze!`` method.
+module Aldine::Concerns::Freezer
+  protected
 
-    # @return [String]
-    def project_name
-      settings.get('output_name').tap do |value|
-        if value.to_s.empty?
-          # rubocop:disable Style/RedundantException
-          raise RuntimeError, 'Output name can not be nil'
-          # rubocop:enable Style/RedundantException
-        end
-      end.to_s
+  # @param [Object] target
+  #
+  # @return [Object]
+  def deep_freeze!(target)
+    require('ice_nine').then do
+      ::IceNine.deep_freeze!(target)
     end
-
-    alias output_name project_name
   end
 end
