@@ -8,16 +8,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../aldine'
+require_relative '../concerns'
 
-# Namespcae module for concerns.
-module Aldine::Concerns
-  "#{__dir__}/concerns".then do |libdir|
-    {
-      Freezable: :freezable,
-      Freezer: :freezer,
-      HasInflector: :has_inflector,
-      SettingsAware: :settings_aware,
-    }.each { |k, v| autoload(k, "#{libdir}/#{v}") }
+# Provides access to ``inflector``.
+module Aldine::Concerns::HasInflector
+  protected
+
+  # @return [::Dry::Inflector]
+  def inflector
+    require('dry/inflector')
+      .then { ::Dry::Inflector.new }
   end
 end
