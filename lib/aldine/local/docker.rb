@@ -18,6 +18,7 @@ module Aldine::Local::Docker
     {
       Command: :command,
       EnvFile: :env_file,
+      ImageNamer: :image_namer,
       RakeRunner: :rake_runner,
     }.each { |k, v| autoload(k, "#{path}/#{v}") }
   end
@@ -38,7 +39,7 @@ module Aldine::Local::Docker
     #
     # @return [String]
     def image
-      "u#{user.uid}/texlive-#{tex.project_name}"
+      ImageNamer.new(user: user).call
     end
 
     # Get list of directories used by docker.
@@ -184,9 +185,7 @@ module Aldine::Local::Docker
 
     # @return [::Aldine::Utils::BundleConfig]
     def bundle_config
-      shell.pwd.then do |basedir|
-        ::Aldine::Utils::BundleConfig.new(basedir)
-      end
+      ::Aldine::Utils::BundleConfig.new(shell.pwd)
     end
   end
 end
