@@ -14,5 +14,6 @@ require_relative '../aldine'
 module Aldine::Utils
   {
     BundleConfig: 'bundle_config',
+    TemplateString: 'template_string',
   }.each { |k, v| autoload(k, "#{__dir__}/utils/#{v}") }
 end
