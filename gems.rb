@@ -18,6 +18,7 @@ group :default do
   gem 'clamp', '~> 1.3'
   gem 'dotenv', '~> 2.8'
   gem 'dotenv_validator', '~> 1.2'
+  gem 'dry-inflector', '~> 0.1'
   gem 'faker', '~> 2.21'
   gem 'ice_nine'
   gem 'kamaze-version', '~> 1.0'
