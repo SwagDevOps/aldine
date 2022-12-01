@@ -6,9 +6,9 @@
 # noinspection RubyLiteralArrayInspection
 Gem::Specification.new do |s|
   s.name        = "aldine"
-  s.version     = "0.0.5"
-  s.date        = "2022-11-11"
-  s.summary     = "Light utilities for LaTeX"
+  s.version     = "0.0.6"
+  s.date        = "2022-12-01"
+  s.summary     = "Utilities and build system on top of LaTeX"
   s.description = "Light utilities for LaTeX (standalone document preparation system)"
 
   s.licenses    = ["LGPL-3.0"]
@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
     "aldine",
   ]
   s.files         = [
+    ".env.sample",
     ".yardopts",
     "README.md",
     "bin/aldine",
@@ -49,9 +50,18 @@ Gem::Specification.new do |s|
     "lib/aldine/cli/commands/shared/files_matcher.rb",
     "lib/aldine/cli/commands/shared/svg_conv.rb",
     "lib/aldine/cli/commands/svg_conv_command.rb",
+    "lib/aldine/concerns.rb",
+    "lib/aldine/concerns/freezable.rb",
+    "lib/aldine/concerns/freezer.rb",
+    "lib/aldine/concerns/has_inflector.rb",
+    "lib/aldine/concerns/settings_aware.rb",
+    "lib/aldine/dotenv_loader.rb",
     "lib/aldine/local.rb",
     "lib/aldine/local/config.rb",
     "lib/aldine/local/docker.rb",
+    "lib/aldine/local/docker/command.rb",
+    "lib/aldine/local/docker/env_file.rb",
+    "lib/aldine/local/docker/image_namer.rb",
     "lib/aldine/local/docker/rake_runner.rb",
     "lib/aldine/local/shell.rb",
     "lib/aldine/local/tasks.rb",
@@ -64,6 +74,9 @@ Gem::Specification.new do |s|
     "lib/aldine/remote/pdf_builder.rb",
     "lib/aldine/remote/synchro.rb",
     "lib/aldine/remote/tasks.rb",
+    "lib/aldine/settings.rb",
+    "lib/aldine/settings/parsed.rb",
+    "lib/aldine/settings/parser.rb",
     "lib/aldine/shell.rb",
     "lib/aldine/shell/chalk.rb",
     "lib/aldine/shell/command.rb",
@@ -71,11 +84,16 @@ Gem::Specification.new do |s|
     "lib/aldine/shell/readline.rb",
     "lib/aldine/utils.rb",
     "lib/aldine/utils/bundle_config.rb",
+    "lib/aldine/utils/template_string.rb",
     "lib/aldine/version.yml",
   ]
 
   s.add_runtime_dependency("clamp", ["~> 1.3"])
+  s.add_runtime_dependency("dotenv", ["~> 2.8"])
+  s.add_runtime_dependency("dotenv_validator", ["~> 1.2"])
+  s.add_runtime_dependency("dry-inflector", ["~> 0.1"])
   s.add_runtime_dependency("faker", ["~> 2.21"])
+  s.add_runtime_dependency("ice_nine", [">= 0"])
   s.add_runtime_dependency("kamaze-version", ["~> 1.0"])
   s.add_runtime_dependency("rouge", ["~> 3.29"])
   s.add_runtime_dependency("stibium-bundled", ["~> 0.0", ">= 0.0.4"])

@@ -13,8 +13,17 @@ require_relative '../local'
 # Tex project related methods.
 module Aldine::Local::Tex
   class << self
+    include(::Aldine::Concerns::SettingsAware)
+
+    # @return [String]
     def project_name
-      ENV.fetch('TEX_PROJECT_NAME')
+      settings.get('output_name').tap do |value|
+        if value.to_s.empty?
+          # rubocop:disable Style/RedundantException
+          raise RuntimeError, 'Output name can not be nil'
+          # rubocop:enable Style/RedundantException
+        end
+      end.to_s
     end
 
     alias output_name project_name

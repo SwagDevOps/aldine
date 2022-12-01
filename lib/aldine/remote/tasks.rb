@@ -8,15 +8,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../remote'
+require_relative('../remote').then do
+  ::Aldine.dotenv { require 'rake' }
+end
 
 autoload(:IRB, 'irb')
 autoload(:FileUtils, 'fileutils')
-require 'rake'
 
 # variables ---------------------------------------------------------
 
-config = Aldine::Remote::Config
+config = Aldine::Remote::Config.new
 path = Aldine::Remote::Path
 
 # methods & constants -----------------------------------------------

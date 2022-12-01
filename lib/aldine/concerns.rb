@@ -10,19 +10,14 @@
 
 require_relative '../aldine'
 
-# Module related to rake local tasks.
-module Aldine::Local
-  autoload(:Pathname, 'pathname')
-
-  # @type [Pathname]
-  RESOURCES_DIR = Pathname.new(__FILE__.gsub(/\.rb$/, '')).join('resources').realpath.freeze
-
-  "#{__dir__}/local".tap do |path|
+# Namespcae module for concerns.
+module Aldine::Concerns
+  "#{__dir__}/concerns".then do |libdir|
     {
-      Config: 'config',
-      Docker: 'docker',
-      Shell: 'shell',
-      Tex: 'tex',
-    }.each { |k, v| autoload(k, "#{path}/#{v}") }
+      Freezable: :freezable,
+      Freezer: :freezer,
+      HasInflector: :has_inflector,
+      SettingsAware: :settings_aware,
+    }.each { |k, v| autoload(k, "#{libdir}/#{v}") }
   end
 end

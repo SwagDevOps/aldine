@@ -8,21 +8,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../aldine'
+require_relative '../settings'
 
-# Module related to rake local tasks.
-module Aldine::Local
-  autoload(:Pathname, 'pathname')
+# Hash featuring autovivification and ``deep_freeze``.
+class Aldine::Settings::Parsed < ::Hash
+  include(::Aldine::Concerns::Freezable)
 
-  # @type [Pathname]
-  RESOURCES_DIR = Pathname.new(__FILE__.gsub(/\.rb$/, '')).join('resources').realpath.freeze
-
-  "#{__dir__}/local".tap do |path|
-    {
-      Config: 'config',
-      Docker: 'docker',
-      Shell: 'shell',
-      Tex: 'tex',
-    }.each { |k, v| autoload(k, "#{path}/#{v}") }
+  def initialize
+    super() { |h, k| h[k] = h.dup.clear }
   end
 end

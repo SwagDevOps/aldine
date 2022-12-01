@@ -26,4 +26,8 @@ end
 task default: ['gem:gemspec']
 
 # tasks ---------------------------------------------------------------
-Dir.glob("#{__dir__}/tasks/**/*.rb").sort.each { |fp| require(fp) }
+::Aldine.dotenv do
+  Dir.glob("#{__dir__}/tasks/**/*.rb")
+     .sort
+     .each { |fp| require(fp) }
+end

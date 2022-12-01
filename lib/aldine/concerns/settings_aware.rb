@@ -8,21 +8,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../aldine'
+require_relative '../concerns'
 
-# Module related to rake local tasks.
-module Aldine::Local
-  autoload(:Pathname, 'pathname')
+# Provides access to ``settings``.
+module Aldine::Concerns::SettingsAware
+  protected
 
-  # @type [Pathname]
-  RESOURCES_DIR = Pathname.new(__FILE__.gsub(/\.rb$/, '')).join('resources').realpath.freeze
-
-  "#{__dir__}/local".tap do |path|
-    {
-      Config: 'config',
-      Docker: 'docker',
-      Shell: 'shell',
-      Tex: 'tex',
-    }.each { |k, v| autoload(k, "#{path}/#{v}") }
+  # @return [::Aldine::Settings]
+  def settings
+    ::Aldine::Settings.instance
   end
 end
