@@ -6,9 +6,9 @@
 # noinspection RubyLiteralArrayInspection
 Gem::Specification.new do |s|
   s.name        = "aldine"
-  s.version     = "0.0.5"
-  s.date        = "2022-11-11"
-  s.summary     = "Light utilities for LaTeX"
+  s.version     = "0.0.6"
+  s.date        = "2022-12-01"
+  s.summary     = "Utilities and build system on top of LaTeX"
   s.description = "Light utilities for LaTeX (standalone document preparation system)"
 
   s.licenses    = ["LGPL-3.0"]
@@ -53,6 +53,7 @@ Gem::Specification.new do |s|
     "lib/aldine/concerns.rb",
     "lib/aldine/concerns/freezable.rb",
     "lib/aldine/concerns/freezer.rb",
+    "lib/aldine/concerns/has_inflector.rb",
     "lib/aldine/concerns/settings_aware.rb",
     "lib/aldine/dotenv_loader.rb",
     "lib/aldine/local.rb",
@@ -60,6 +61,7 @@ Gem::Specification.new do |s|
     "lib/aldine/local/docker.rb",
     "lib/aldine/local/docker/command.rb",
     "lib/aldine/local/docker/env_file.rb",
+    "lib/aldine/local/docker/image_namer.rb",
     "lib/aldine/local/docker/rake_runner.rb",
     "lib/aldine/local/shell.rb",
     "lib/aldine/local/tasks.rb",
@@ -82,6 +84,7 @@ Gem::Specification.new do |s|
     "lib/aldine/shell/readline.rb",
     "lib/aldine/utils.rb",
     "lib/aldine/utils/bundle_config.rb",
+    "lib/aldine/utils/template_string.rb",
     "lib/aldine/version.yml",
   ]
 

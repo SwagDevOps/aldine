@@ -1,17 +1,17 @@
 ---
 major: 0
 minor: 0
-patch: 5
+patch: 6
 authors: ['Dimitri Arrigoni']
 email: 'dimitri@arrigoni.me'
-date: '2022-11-11'
+date: '2022-12-01'
 homepage: 'https://github.com/SwagDevOps/aldine'
 # MUST follow the higher required_ruby_version
 # requires version >= 2.3.0 due to safe navigation operator &
 # requires version >= 2.5.0 due to Lint/Syntax: unexpected token kRESCUE
 # requires version >= 2.7.0 due to ... operator
 required_ruby_version: '>= 2.7.0'
-summary: 'Light utilities for LaTeX'
+summary: 'Utilities and build system on top of LaTeX'
 description: 'Light utilities for LaTeX (standalone document preparation system)'
 licenses: ['LGPL-3.0']
 license_header: |
