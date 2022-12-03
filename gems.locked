@@ -93,6 +93,7 @@ GEM
       wisper (~> 2.0)
     tty-screen (0.8.1)
     unicode-display_width (2.2.0)
+    vendorer (0.2.0)
     webrick (1.7.0)
     wisper (2.0.1)
     yard (0.9.28)
@@ -126,6 +127,7 @@ DEPENDENCIES
   rugged (~> 1.0)
   stibium-bundled (~> 0.0, >= 0.0.4)
   sys-proc (~> 1.1)
+  vendorer (~> 0.2)
   yard (~> 0.9)
   yard-coderay (~> 0.1)
 

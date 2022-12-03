@@ -25,6 +25,7 @@ group :default do
   gem 'rake', '~> 13.0'
   gem 'rouge', '~> 3.29'
   gem 'stibium-bundled', '~> 0.0', '>= 0.0.4'
+  gem 'vendorer', '~> 0.2'
   gem 'yard', '~> 0.9'
 end
 
