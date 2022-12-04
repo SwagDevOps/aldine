@@ -19,6 +19,7 @@ autoload(:FileUtils, 'fileutils')
 
 config = Aldine::Remote::Config.new
 path = Aldine::Remote::Path
+settings = Aldine::Settings.instance
 
 # methods & constants -----------------------------------------------
 
@@ -109,4 +110,15 @@ task :sync do
     Aldine::Remote::Synchro.new(path.configure(:src_dir), path.configure(:tex_dir)),
     Aldine::Remote::BundleSetup.new(path.configure(:tex_dir)),
   ].each(&:call)
+end
+
+desc 'Vendorer setup'
+task :'vendorer:setup' do
+  settings.get('container.workdir').then do |workdir|
+    Dir.chdir(workdir) do
+      ::Aldine::Remote::Vendorer.new.then { |vendorer| vendorer.file ? vendorer.call : [] }.then do |errors|
+        raise errors.first unless errors.empty?
+      end
+    end
+  end
 end

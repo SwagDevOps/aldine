@@ -38,8 +38,8 @@ task default: [:'tex:build']
 unless Rake::Task.task_defined?(:setup)
   desc 'Setup'
   task :setup do
-    # @todo do something with the bin directory of gem
-    Bundler.locked_gems.specs.keep_if { |v| v.name == 'aldine' }.fetch(0).full_gem_path
+    # @todo do something with the bin directory of gem?
+    # Bundler.locked_gems.specs.keep_if { |v| v.name == 'aldine' }.fetch(0).full_gem_path
   end
 end
 
@@ -72,4 +72,9 @@ end
 desc 'TeX log'
 task 'tex:log': %w[docker:build setup] do
   Aldine::Local::Docker.rake(:log, path: config[:src_dir])
+end
+
+desc 'Vendorer setup'
+task 'vendorer:setup': %w[docker:build setup] do
+  Aldine::Local::Docker.rake(:'vendorer:setup', path: config[:tmp_dir])
 end
