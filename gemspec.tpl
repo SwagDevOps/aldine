@@ -4,12 +4,12 @@
 # rubocop:disable all
 <?rb
 @files = [
-    '.env.sample',
     '.yardopts',
     'README.md',
     'bin/*',
     'lib/**/*.rb',
     'lib/**/version.yml',
+    'lib/**/resources/**/*',
 ].map { |m| Dir.glob(m) }.flatten.keep_if { |f| File.file?(f) }.sort
 
 self.singleton_class.__send__(:define_method, :quote) do |input|

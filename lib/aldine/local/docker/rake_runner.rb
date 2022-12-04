@@ -30,7 +30,7 @@ class Aldine::Local::Docker::RakeRunner
 
   # @param [String] task
   def call(task, **options)
-    command_for(task, path: options[:path]).then do |command|
+    command_for(task, path: options[:path].to_s).then do |command|
       self.runner.call(command, **options)
     end
   end

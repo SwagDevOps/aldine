@@ -30,6 +30,17 @@ See also:
 * [Dotenv][bkeepers/dotenv]
 * [Dotenv Validator][fastruby/dotenv_validator]
 
+## Developper
+
+### Replacement ``Rakefile`` in ``tmp`` directory
+
+```ruby
+# frozen_string_literal: true                                                                 
+
+require 'bundler/setup'
+require '/workdir/lib/aldine'
+require 'aldine/remote/tasks'
+```
 
 <!-- hypelinks -->
 

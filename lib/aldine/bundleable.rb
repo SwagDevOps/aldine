@@ -27,6 +27,8 @@ module Aldine::Bundleable
   BUNDLE_HANDLER = lambda do |bundle|
     with_bundle(bundle) do
       require 'kamaze/project/core_ext/pp' if gems_for(bundle)&.include?('kamaze-project')
+    rescue LoadError => e
+      warn(e.message)
     end
   end
 
