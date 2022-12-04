@@ -22,6 +22,7 @@ group :default do
   gem 'faker', '~> 2.21'
   gem 'ice_nine'
   gem 'kamaze-version', '~> 1.0'
+  gem 'rake', '~> 13.0'
   gem 'rouge', '~> 3.29'
   gem 'stibium-bundled', '~> 0.0', '>= 0.0.4'
   gem 'yard', '~> 0.9'
@@ -30,7 +31,6 @@ end
 group :development do
   github 'SwagDevOps/kamaze-project', { branch: 'develop' }
   gem 'listen', '~> 3.1'
-  gem 'rake', '~> 13.0'
   gem 'rubocop', '~> 1.3'
   gem 'rugged', '~> 1.0'
   gem 'sys-proc', '~> 1.1'
