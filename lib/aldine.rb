@@ -16,6 +16,9 @@ require 'English'
 module Aldine
   autoload(:Pathname, 'pathname')
 
+  # @type [Pathname]
+  RESOURCES_DIR = Pathname.new(__FILE__.gsub(/\.rb$/, '')).join('resources').realpath.freeze
+
   Pathname.new(__dir__).join('aldine').then do |libdir|
     {
       Bundleable: :bundleable,
@@ -51,9 +54,7 @@ module Aldine
     #
     # @return [Hash{String => String}]
     def dotenv(&block)
-      Pathname.new(__FILE__).dirname.join('..').realpath.then do |path|
-        DotenvLoader.new(path).call(&block)
-      end
+      DotenvLoader.new.call(&block)
     end
   end
 end

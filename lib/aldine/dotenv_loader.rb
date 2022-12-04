@@ -19,14 +19,14 @@ class Aldine::DotenvLoader
 
   # @api private
   ENV_FILES = %w[.env.local .env].freeze
+  # @api private
+  SAMPLE_ENV = ::Aldine::RESOURCES_DIR.join('sample.env').realpath.freeze
 
   # @return [Pathname]
   attr_reader :base_dir
 
-  # @param [String, Pathname] base_dir
   # @param [Array<String>|nil] files
-  def initialize(base_dir, files = nil)
-    self.base_dir = Pathname.new(base_dir).realpath
+  def initialize(files = nil)
     @files = (Array(files).empty? ? ENV_FILES : Array(files).map(&:to_s)).freeze
   end
 
@@ -50,7 +50,7 @@ class Aldine::DotenvLoader
   # @return [Pathname]
   def sample
     Pathname.pwd.join('.env.sample').then do |env_sample|
-      return env_sample.exist? ? env_sample : base_dir.join('.env.sample')
+      return env_sample.exist? ? env_sample : SAMPLE_ENV
     end
   end
 
