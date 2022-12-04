@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
     "aldine",
   ]
   s.files         = [
-    ".env.sample",
     ".yardopts",
     "README.md",
     "bin/aldine",
@@ -63,6 +62,7 @@ Gem::Specification.new do |s|
     "lib/aldine/local/docker/env_file.rb",
     "lib/aldine/local/docker/image_namer.rb",
     "lib/aldine/local/docker/rake_runner.rb",
+    "lib/aldine/local/resources/container.env",
     "lib/aldine/local/shell.rb",
     "lib/aldine/local/tasks.rb",
     "lib/aldine/local/tex.rb",
@@ -72,8 +72,11 @@ Gem::Specification.new do |s|
     "lib/aldine/remote/inotify_wait.rb",
     "lib/aldine/remote/path.rb",
     "lib/aldine/remote/pdf_builder.rb",
+    "lib/aldine/remote/resources/rake/Rakefile",
     "lib/aldine/remote/synchro.rb",
     "lib/aldine/remote/tasks.rb",
+    "lib/aldine/remote/vendorer.rb",
+    "lib/aldine/resources/sample.env",
     "lib/aldine/settings.rb",
     "lib/aldine/settings/parsed.rb",
     "lib/aldine/settings/parser.rb",
@@ -95,8 +98,10 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency("faker", ["~> 2.21"])
   s.add_runtime_dependency("ice_nine", [">= 0"])
   s.add_runtime_dependency("kamaze-version", ["~> 1.0"])
+  s.add_runtime_dependency("rake", ["~> 13.0"])
   s.add_runtime_dependency("rouge", ["~> 3.29"])
   s.add_runtime_dependency("stibium-bundled", ["~> 0.0", ">= 0.0.4"])
+  s.add_runtime_dependency("vendorer", ["~> 0.2"])
   s.add_runtime_dependency("yard", ["~> 0.9"])
 end
 
