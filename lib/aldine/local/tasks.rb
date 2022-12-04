@@ -21,12 +21,6 @@ autoload(:Bundler, 'bundler')
 autoload(:FileUtils, 'fileutils')
 autoload(:Pathname, 'pathname')
 
-# environment ----------------------------------------------------------------
-
-caller_locations.fetch(0).to_s.then do |fp|
-  ENV['TEX_PROJECT_NAME'] ||= Pathname.new(fp).dirname.basename.to_s.freeze
-end
-
 # config ---------------------------------------------------------------------
 
 config = Aldine::Local::Config
