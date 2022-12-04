@@ -26,6 +26,7 @@ module Aldine::Remote
       # processes -----------------------------------------------------
       BundleSetup: :bundle_setup,
       Synchro: :synchro,
+      Vendorer: :vendorer,
     }.each { |k, v| autoload(k, "#{path}/#{v}") }
   end
 end
