@@ -11,5 +11,7 @@
 require_relative '../local'
 
 # Provide config based on evironment variables
+#
+# @deprecated
 class Aldine::Local::Config < Aldine::Remote::Config
 end

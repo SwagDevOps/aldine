@@ -11,6 +11,8 @@
 require_relative '../remote'
 
 # Provide config based on evironment variables
+#
+# @deprecated
 class Aldine::Remote::Config < ::Hash
   def initialize
     super().tap do
@@ -35,9 +37,11 @@ class Aldine::Remote::Config < ::Hash
     # @api private
     #
     # @todo add watch_exclude to settings
+    # @todo supress this stuff and use settings instead
     def defaults
       {
         tex_dir: settings.get('directories.tmp'), # 'tmp'
+        tmp_dir: settings.get('directories.tmp'),
         src_dir: settings.get('directories.src'),
         out_dir: settings.get('directories.out'),
         output_name: settings.get('output_name'),
