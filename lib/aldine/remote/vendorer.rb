@@ -160,7 +160,7 @@ class Aldine::Remote::Vendorer
       .map { |k, v| v.merge({ path: k }) }
       .map { |h| h.transform_keys(&:to_sym) }
       .keep_if { |h| ![h[:path], h[:url]].map(&:to_s).include?('') }
-      .map { f.call(h) }
+      .map { |h| f.call(h) }
   end
 
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/PerceivedComplexity
