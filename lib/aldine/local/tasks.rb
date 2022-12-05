@@ -14,16 +14,19 @@
 # Tasks strictly relating to LaTeX live in the ``tex`` namespace.
 
 require_relative('../local').then do
-  ::Aldine.dotenv { require 'rake' }
+  ::Aldine.dotenv
+
+  {
+    Rake: 'rake',
+    Bundler: 'bundler',
+    FileUtils: 'fileutils',
+    Pathname: 'pathname',
+  }.each { |k, v| autoload(k, v) }
 end
 
-autoload(:Bundler, 'bundler')
-autoload(:FileUtils, 'fileutils')
-autoload(:Pathname, 'pathname')
+# variables -----------------------------------------------------------------
 
-# config ---------------------------------------------------------------------
-
-config = Aldine::Local::Config
+settings = Aldine::Settings.instance
 
 # tasks ----------------------------------------------------------------------
 
@@ -50,25 +53,25 @@ end
 
 desc 'Irb'
 task irb: %w[docker:build setup] do
-  Aldine::Local::Docker.rake(:shell, path: config[:src_dir])
+  Aldine::Local::Docker.rake(:shell, path: settings.get('directories.src'))
 end
 
 desc 'TeX sync'
 task 'tex:sync': %w[docker:build setup] do
-  Aldine::Local::Docker.rake(:sync, path: config[:src_dir])
+  Aldine::Local::Docker.rake(:sync, path: settings.get('directories.src'))
 end
 
 desc 'TeX build'
 task 'tex:build': %w[tex:sync] do
-  Aldine::Local::Docker.rake(:all, path: config[:tex_dir])
+  Aldine::Local::Docker.rake(:all, path: settings.get('directories.tmp'))
 end
 
 desc 'TeX log'
 task 'tex:log': %w[docker:build setup] do
-  Aldine::Local::Docker.rake(:log, path: config[:src_dir])
+  Aldine::Local::Docker.rake(:log, path: settings.get('directories.src'))
 end
 
 desc 'Vendorer setup'
 task 'vendorer:setup': %w[docker:build setup] do
-  Aldine::Local::Docker.rake(:'vendorer:setup', path: config[:tmp_dir])
+  Aldine::Local::Docker.rake(:'vendorer:setup', path: settings.get('directories.tmp'))
 end

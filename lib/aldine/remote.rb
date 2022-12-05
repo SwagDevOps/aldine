@@ -19,7 +19,6 @@ module Aldine::Remote
   # noinspection RubyLiteralArrayInspection,RubyResolve
   "#{__dir__}/remote".tap do |path|
     {
-      Config: :config,
       Path: :path,
       InotifyWait: :inotify_wait,
       PdfBuilder: :pdf_builder,
