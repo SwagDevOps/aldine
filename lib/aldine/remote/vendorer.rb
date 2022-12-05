@@ -32,7 +32,12 @@ require_relative '../remote'
 class Aldine::Remote::Vendorer
   autoload(:Pathname, 'pathname')
   autoload(:Vendorer, 'vendorer')
-  autoload(:YAML, 'yaml')
+  # noinspection RubyLiteralArrayInspection,RubyResolve
+  "#{__dir__}/vendorer".tap do |path|
+    {
+      Parser: :parser,
+    }.each { |k, v| autoload(k, "#{path}/#{v}") }
+  end
 
   # @param [Pathname, nil] path
   def initialize(path = nil)
@@ -59,8 +64,8 @@ class Aldine::Remote::Vendorer
   end
 
   # @return [Array<Hash{Symbol => Object}>]
-  def parse
-    self.__send__(:transform)
+  def payload
+    file? ? Parser.new.call(file) : []
   end
 
   # @return [Pathname]
@@ -95,28 +100,6 @@ class Aldine::Remote::Vendorer
   # @type [Pathname]
   attr_accessor :path
 
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
-
-  # Transform values seen in YAML manifest.
-  #
-  # @return [Array<Hash{Symbol => Object}>]
-  def transform
-    prepare.map do |h|
-      h.tap { h[:options] = (h[:options] || {}).transform_keys(&:to_sym) if h[:options] }
-    end.map do |h|
-      h.tap do
-        if (h[:options] || {}).empty?
-          [:ref, :tag, :branch].each do |k|
-            h[:options] = (h[:options] || {}).merge({ k => h[k] }) if h[k]
-            h.delete(k)
-          end
-        end
-      end
-    end.map { |h| h.sort_by { |k, _| k }.to_h }
-  end
-
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
-
   # Parameters for ``file`` and ``folder`` methods.
   #
   # @see Vendorer#file()
@@ -124,7 +107,7 @@ class Aldine::Remote::Vendorer
   #
   # @return [Array<Array>]
   def parameters
-    parse.map do |h|
+    self.payload.map do |h|
       [
         h.fetch(:type),
         Pathname.new(h.fetch(:path).to_s).then { |path| path.absolute? ? path : self.path.join(path) },
@@ -134,36 +117,6 @@ class Aldine::Remote::Vendorer
       end
     end
   end
-
-  # Read yaml file.
-  #
-  # @return [Array<Hash{Symbol => Object}>, nil]
-  def read
-    self.file? ? YAML.safe_load(file.read) : nil
-  end
-
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/PerceivedComplexity
-
-  # @return [Array<Hash{Symbol => Object}>]
-  def prepare
-    # options hash is present depending on type folder - type folder is implicit and preferred
-    f = lambda do |h|
-      (h[:type] || 'folder').then do |type|
-        {
-          type: type,
-          options: type == 'folder' ? h.fetch(:options, {}) : nil,
-        }.compact.then { |v| h.merge(v) }
-      end
-    end
-
-    (read || {})
-      .map { |k, v| v.merge({ path: k }) }
-      .map { |h| h.transform_keys(&:to_sym) }
-      .keep_if { |h| ![h[:path], h[:url]].map(&:to_s).include?('') }
-      .map { |h| f.call(h) }
-  end
-
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/PerceivedComplexity
 
   # Instanciate an instance.
   #
