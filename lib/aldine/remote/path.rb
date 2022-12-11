@@ -12,15 +12,29 @@ require_relative '../remote'
 
 autoload(:Pathname, 'pathname')
 
-# Absolute path
+# Absolute path (configured inside workdir).
 class Aldine::Remote::Path < Pathname
-  def initialize(path, env: ENV)
-    super(Pathname.new(env.fetch('WORKDIR')).join(path))
+  include ::Aldine::Concerns::SettingsAware
+
+  def initialize(*)
+    'container.workdir'.then do |key|
+      settings.get(key).tap do |v|
+        raise "Get nil value for #{key.inspect}" if v.nil?
+      end
+    end.then { |workdir| super(workdir) }
   end
 
   class << self
-    def configure(key)
-      ::Aldine::Remote::Config.new.fetch(key).yield_self { |v| self.new(v) }
+    include ::Aldine::Concerns::SettingsAware
+
+    # @return [self, Pathname]
+    def call(key = nil)
+      return self.new if key.nil?
+
+      # @type [Hash{Symbol => String}] directories
+      settings.get('directories', {}).then do |directories|
+        directories.fetch(key.to_sym).then { |v| self.new.join(v) }
+      end
     end
   end
 end

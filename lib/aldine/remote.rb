@@ -19,13 +19,13 @@ module Aldine::Remote
   # noinspection RubyLiteralArrayInspection,RubyResolve
   "#{__dir__}/remote".tap do |path|
     {
-      Config: :config,
       Path: :path,
       InotifyWait: :inotify_wait,
       PdfBuilder: :pdf_builder,
       # processes -----------------------------------------------------
       BundleSetup: :bundle_setup,
       Synchro: :synchro,
+      Vendorer: :vendorer,
     }.each { |k, v| autoload(k, "#{path}/#{v}") }
   end
 end

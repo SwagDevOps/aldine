@@ -16,13 +16,13 @@ require_relative '../remote'
 class Aldine::Remote::PdfBuilder
   autoload(:Pathname, 'pathname')
 
+  include(::Aldine::Concerns::SettingsAware)
+
   # @param [Symbol] type
-  # @param [Hash, Config] config
-  # @param [Hash{String => String]}]
-  def initialize(type, config: nil, env: {})
-    @config = config || ::Aldine::Remote::Config.new
-    @env = env || {}
+  # @param [Hash{String => String]}, nil] env
+  def initialize(type, env: nil)
     @type = type.to_sym
+    @env = (env || {}).transform_keys(&:to_s).transform_values(&:to_s)
   end
 
   # @return [Pathname]
@@ -32,12 +32,12 @@ class Aldine::Remote::PdfBuilder
 
   # @return [String]
   def jobname
-    [config.fetch(:output_name), type].join('.')
+    [settings.get('output_name'), type].join('.')
   end
 
   # @return [String]
   def filename
-    [config.fetch(:latex_name), type, 'tex'].join('.')
+    [settings.get('latex_name'), type, 'tex'].join('.')
   end
 
   # @return [Pahname]
@@ -65,12 +65,17 @@ class Aldine::Remote::PdfBuilder
 
   # @return [Array<Shell::Coomand>]
   def sequence
-    ['pdflatex'].concat(self.class.options).concat(["-jobname=#{jobname}", filename]).yield_self do |cmd|
+    ['pdflatex'].concat(self.class.options).concat(["-jobname=#{jobname}", filename]).then do |cmd|
       [
-        ::Aldine::Shell::Command.new(cmd, env: env),
-        ::Aldine::Shell::Command.new(['makeindex', filename], env: env),
-        ::Aldine::Shell::Command.new(cmd, env: env),
+        command(cmd),
+        command(['makeindex', filename]),
+        command(cmd),
       ]
     end
+  end
+
+  # @param [Array<String>] command
+  def command(command)
+    ::Aldine::Shell::Command.new(command, env: self.env)
   end
 end

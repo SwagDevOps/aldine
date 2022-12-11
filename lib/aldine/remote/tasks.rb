@@ -15,26 +15,21 @@ end
 autoload(:IRB, 'irb')
 autoload(:FileUtils, 'fileutils')
 
-# variables ---------------------------------------------------------
+# variables -----------------------------------------------------------
 
-config = Aldine::Remote::Config.new
 path = Aldine::Remote::Path
-
-# methods & constants -----------------------------------------------
-
-{
-  fs: FileUtils::Verbose,
-  pdf: lambda do |type|
-    Aldine::Remote::PdfBuilder.new(type).call.tap { |file| fs.mv(file, path.configure(:out_dir)) }
-  end
-}.each do |k, v|
-  self.singleton_class.define_method(k) { v }
+settings = Aldine::Settings.instance
+fs = FileUtils::Verbose
+pdf = lambda do |type|
+  Aldine::Remote::PdfBuilder.new(type).call.tap { |file| fs.mv(file, path.call('out')) }
 end
 
+# constants -----------------------------------------------------------
+
 PDF_TYPES = lambda do
-  Dir.chdir(Pathname.new(ENV.fetch('WORKDIR')).join(config.fetch(:src_dir))) do
-    Dir.glob("#{config.fetch(:latex_name)}*.tex").map do |fname|
-      fname.gsub(/^#{config.fetch(:latex_name)}\./, '').gsub(/\.tex/, '').to_sym
+  Dir.chdir(path.call(:src).to_path) do
+    Dir.glob("#{settings.get('latex_name')}*.tex").map do |fname|
+      fname.gsub(/^#{settings.get('latex_name')}\./, '').gsub(/\.tex/, '').to_sym
     end.sort
   end
 end.call
@@ -64,7 +59,7 @@ PDF_TYPES.tap do |types|
   task :log do |task|
     # rubocop:disable Layout/BlockAlignment
     types
-      .map { |type| path.configure(:tex_dir).join([config.fetch(:output_name), type, 'log'].join('.')) }
+      .map { |type| path.call(:tmp).join([settings.get(:output_name), type, 'log'].join('.')) }
       .map { |fp| fs.touch(fp) }.tap do |res|
       Aldine::Shell::Command.new(%w[tail --retry -F].concat(res.flatten)).call
     rescue Aldine::Shell::CommandError => e
@@ -88,14 +83,16 @@ end
 
 desc 'Watch'
 task :watch do
-  Aldine::Remote::InotifyWait.new(path.configure(:src_dir).to_s).call do |fpath, events|
+  exclude_matcher = /%r{#{settings.get('watch_exclude', '^.*/(\..+)$')}}/
+
+  Aldine::Remote::InotifyWait.new(path.call('src').to_s).call do |fpath, events|
     Aldine::Shell::Chalk.warn({ fpath => events }, fg: :yellow)
-    unless fpath.match(%r{#{config.fetch(:watch_exclude)}}) # rubocop:disable Style/RegexpLiteral
+    unless fpath.match(exclude_matcher)
       [:reenable, :invoke].each { |m| Rake::Task[:sync].public_send(m) }
       begin
         PDF_TYPES.each { |type| pdf.call(type) }
       rescue Aldine::Shell::CommandError => e
-        ["#{e.class} [#{e.command.first}]:", e.backtrace[-3..-1].join("\n")].join("\n").tap do |message|
+        ["#{e.class} [#{e.command.first}]:", e.backtrace[-3..-1].to_a.join("\n")].join("\n").tap do |message|
           Shell::Chalk.warn(message, fg: :black, bg: :red)
         end
       end
@@ -106,7 +103,18 @@ end
 desc 'Synchronize build directory from sources'
 task :sync do
   [
-    Aldine::Remote::Synchro.new(path.configure(:src_dir), path.configure(:tex_dir)),
-    Aldine::Remote::BundleSetup.new(path.configure(:tex_dir)),
+    Aldine::Remote::Synchro.new(path.call('src'), path.call('tmp')),
+    Aldine::Remote::BundleSetup.new(path.call('tmp')),
   ].each(&:call)
+end
+
+desc 'Vendorer install'
+task :'vendorer:install' do
+  settings.get('container.workdir').then do |workdir|
+    Dir.chdir(workdir) do
+      ::Aldine::Remote::Vendorer.new.then { |vendorer| vendorer.file ? vendorer.call : [] }.then do |errors|
+        raise errors.first unless errors.empty?
+      end
+    end
+  end
 end

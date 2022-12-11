@@ -53,6 +53,7 @@ class Aldine::Local::Docker::Command
     ]
       .compact
       .concat(volumes)
+      .concat(vendorer.volume_for(shell.pwd, workdir))
       .concat(['-w', workdir.join(path.to_s).to_path])
       .concat(env_file.to_a)
       .concat([image])
@@ -108,5 +109,12 @@ class Aldine::Local::Docker::Command
     shell.pwd.then do |basedir|
       bundle_config.bundle_basedir.relative_path_from(basedir).to_path
     end
+  end
+
+  # Get an instance of vendorer (with current path).
+  #
+  # @return [Aldine::Remote::Vendorer]
+  def vendorer
+    ::Aldine::Remote::Vendorer.new(shell.pwd)
   end
 end
