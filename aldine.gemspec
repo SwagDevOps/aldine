@@ -6,8 +6,8 @@
 # noinspection RubyLiteralArrayInspection
 Gem::Specification.new do |s|
   s.name        = "aldine"
-  s.version     = "0.0.7"
-  s.date        = "2022-12-04"
+  s.version     = "0.0.8"
+  s.date        = "2022-12-11"
   s.summary     = "Utilities and build system on top of LaTeX"
   s.description = "Light utilities for LaTeX (standalone document preparation system)"
 
@@ -56,7 +56,6 @@ Gem::Specification.new do |s|
     "lib/aldine/concerns/settings_aware.rb",
     "lib/aldine/dotenv_loader.rb",
     "lib/aldine/local.rb",
-    "lib/aldine/local/config.rb",
     "lib/aldine/local/docker.rb",
     "lib/aldine/local/docker/command.rb",
     "lib/aldine/local/docker/env_file.rb",
@@ -68,7 +67,6 @@ Gem::Specification.new do |s|
     "lib/aldine/local/tex.rb",
     "lib/aldine/remote.rb",
     "lib/aldine/remote/bundle_setup.rb",
-    "lib/aldine/remote/config.rb",
     "lib/aldine/remote/inotify_wait.rb",
     "lib/aldine/remote/path.rb",
     "lib/aldine/remote/pdf_builder.rb",
@@ -76,6 +74,7 @@ Gem::Specification.new do |s|
     "lib/aldine/remote/synchro.rb",
     "lib/aldine/remote/tasks.rb",
     "lib/aldine/remote/vendorer.rb",
+    "lib/aldine/remote/vendorer/parser.rb",
     "lib/aldine/resources/sample.env",
     "lib/aldine/settings.rb",
     "lib/aldine/settings/parsed.rb",
