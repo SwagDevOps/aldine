@@ -10,6 +10,8 @@
 
 require_relative '../local'
 
+# rubocop:disable Metrics/ModuleLength
+
 # Local to docker communication methods.
 module Aldine::Local::Docker
   autoload(:Pathname, 'pathname')
@@ -46,10 +48,12 @@ module Aldine::Local::Docker
     #
     # @return [Array<String>]
     def directories
-      %w[out src tmp] # tex directories
+      # rubocop:disable Style/RedundantParentheses
+      (settings.get('directories').values) # tex directories
         .concat(%w[pack conf home].map { |dir| ".tmp/.sys/bundle/#{dir}" }) # bundle vendoring + config + home
         .sort
         .freeze
+      # rubocop:enable Style/RedundantParentheses
     end
 
     # Build docker image.
@@ -76,7 +80,9 @@ module Aldine::Local::Docker
     #
     # @return [Process::Status]
     def install
-      run(%w[bundle install --standalone])
+      around_execute do
+        run(%w[bundle install --standalone])
+      end
     end
 
     # Execute given task with rake (in given path if any).
@@ -189,3 +195,4 @@ module Aldine::Local::Docker
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength
