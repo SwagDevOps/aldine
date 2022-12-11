@@ -15,6 +15,7 @@ module Aldine::Local::Docker::Commands
   __FILE__.gsub(/\.rb$/, '').tap do |path|
     {
       BaseCommand: :base_command,
+      BuildCommand: :build_command,
       RunCommand: :run_command,
     }.each { |k, v| autoload(k, "#{path}/#{v}") }
   end

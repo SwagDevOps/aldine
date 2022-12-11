@@ -110,11 +110,9 @@ end
 
 desc 'Vendorer install'
 task :'vendorer:install' do
-  settings.get('container.workdir').then do |workdir|
-    Dir.chdir(workdir) do
-      ::Aldine::Remote::Vendorer.new.then { |vendorer| vendorer.file ? vendorer.call : [] }.then do |errors|
-        raise errors.first unless errors.empty?
-      end
+  Dir.chdir(path.call.to_path) do
+    ::Aldine::Remote::Vendorer.new.then { |vendorer| vendorer.file ? vendorer.call : [] }.then do |errors|
+      raise errors.first unless errors.empty?
     end
   end
 end

@@ -60,7 +60,9 @@ module Aldine::Local::Docker
     #
     # @return [Process::Status]
     def build
-      shell.sh('/usr/bin/env', 'docker', 'build', '-t', image, './docker')
+      ::Aldine::Local::Docker::Commands::BuildCommand
+        .new(image: image)
+        .call
     end
 
     # Executes given command in a container.
@@ -126,7 +128,7 @@ module Aldine::Local::Docker
     #
     # @return [Pathname]
     def workdir
-      Pathname.new(env_file.fetch('WORKDIR'))
+      Pathname.new(settings.get('container.build.args.workdir'))
     end
 
     # Get an object representation of the ``tmpdir`` with local and remote paths.
@@ -156,7 +158,6 @@ module Aldine::Local::Docker
           BUNDLE_USER_HOME: '/tmp/bundle',
           TERM: ENV.fetch('TERM', 'xterm'),
           TMPDIR: tmpdir.remote,
-          WORKDIR: settings.get('container.workdir'),
         }.then do |defaults|
           ::Aldine::Local::Docker::EnvFile.new(defaults: defaults)
         end

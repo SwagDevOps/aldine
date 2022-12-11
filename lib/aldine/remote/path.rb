@@ -17,7 +17,7 @@ class Aldine::Remote::Path < Pathname
   include ::Aldine::Concerns::SettingsAware
 
   def initialize(*)
-    'container.workdir'.then do |key|
+    'container.build.args.workdir'.then do |key|
       settings.get(key).tap do |v|
         raise "Get nil value for #{key.inspect}" if v.nil?
       end
