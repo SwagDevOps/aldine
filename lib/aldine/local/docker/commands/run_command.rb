@@ -8,12 +8,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../docker'
+require_relative '../commands'
 
 # Describe base ``run`` command for container.
-class Aldine::Local::Docker::Command
-  include(::Aldine::Concerns::SettingsAware)
-
+class Aldine::Local::Docker::Commands::RunCommand < Aldine::Local::Docker::Commands::BaseCommand
   # rubocop:disable Metrics/ParameterLists
 
   # @param [String] image
@@ -23,13 +21,14 @@ class Aldine::Local::Docker::Command
   # @param [Struct] tmpdir
   # @param [String, nil] path - path relative to workdir from where command will be run
   def initialize(image:, env_file:, user:, workdir:, tmpdir:, path:)
-    self.tap do
+    super.tap do
       self.image = image
       self.env_file = env_file
       self.user = user
       self.workdir = workdir
       self.tmpdir = tmpdir
       self.path = path
+      self.command = []
     end.freeze
   end
 
@@ -38,28 +37,38 @@ class Aldine::Local::Docker::Command
   # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
 
   def to_a
-    [
-      '/usr/bin/env', 'docker', 'run', '--rm',
-      shell.tty? ? '-it' : nil,
-      '-u', [user.uid, user.gid].join(':'),
-      '-e', "TERM=#{ENV.fetch('TERM', 'xterm')}",
-      '-e', "TMPDIR=#{tmpdir.remote}",
-      '-v', "#{tmpdir.local.realpath}:#{tmpdir.remote}",
-      '-v', "#{tmpdir.local.join('.sys/bundle/home').realpath}:#{env_file.fetch('BUNDLE_USER_HOME')}",
-      '-v', "#{tmpdir.local.join('.sys/bundle/pack').realpath}:#{workdir.join(bundle_basedir)}",
-      '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
-      '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
-      '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
-    ]
-      .compact
+    super
+      .concat(%w[run --rm])
+      .concat(shell.tty? ? ['-it'] : [])
+      .concat([
+                '-u', [user.uid, user.gid].join(':'),
+                '-e', "TERM=#{ENV.fetch('TERM', 'xterm')}",
+                '-e', "TMPDIR=#{tmpdir.remote}",
+                '-v', "#{tmpdir.local.realpath}:#{tmpdir.remote}",
+                '-v', "#{tmpdir.local.join('.sys/bundle/home').realpath}:#{env_file.fetch('BUNDLE_USER_HOME')}",
+                '-v', "#{tmpdir.local.join('.sys/bundle/pack').realpath}:#{workdir.join(bundle_basedir)}",
+                '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
+                '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
+                '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
+              ])
       .concat(volumes)
       .concat(vendorer.volume_for(shell.pwd, workdir))
       .concat(['-w', workdir.join(path.to_s).to_path])
       .concat(env_file.to_a)
       .concat([image])
+      .concat(self.command)
   end
 
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
+  # @param [Array<String>]
+  #
+  # @return [self]
+  def concat(command)
+    self.tap do
+      self.command.push(*command)
+    end
+  end
 
   protected
 
@@ -81,10 +90,10 @@ class Aldine::Local::Docker::Command
   # @type [::Aldine::Local::Docker::EnvFile]
   attr_accessor :env_file
 
-  # @return [Module<::Aldine::Local::Shell>]
-  def shell
-    ::Aldine::Local::Shell
-  end
+  # Command executed in docker.
+  #
+  # @type [Array<String>]
+  attr_accessor :command
 
   # Options for volumes (from directories settings).
   #

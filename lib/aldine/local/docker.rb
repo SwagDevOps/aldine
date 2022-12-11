@@ -10,8 +10,6 @@
 
 require_relative '../local'
 
-# rubocop:disable Metrics/ModuleLength
-
 # Local to docker communication methods.
 module Aldine::Local::Docker
   autoload(:Pathname, 'pathname')
@@ -19,6 +17,7 @@ module Aldine::Local::Docker
   __FILE__.gsub(/\.rb$/, '').tap do |path|
     {
       Command: :command,
+      Commands: :commands,
       EnvFile: :env_file,
       ImageNamer: :image_namer,
       RakeRunner: :rake_runner,
@@ -27,6 +26,7 @@ module Aldine::Local::Docker
 
   class << self
     include(::Aldine::Concerns::SettingsAware)
+    include(::Aldine::Concerns::HasLocalShell)
 
     # Get current UNIX user.
     #
@@ -116,18 +116,10 @@ module Aldine::Local::Docker
     #
     # @return [Process::Status]
     def execute(command = [], user:, path: nil, exception: true, silent: false)
-      command_for(user: user, path: path)
-        .to_a
+      ::Aldine::Local::Docker::Commands::RunCommand
+        .new(image: image, env_file: env_file, user: user, tmpdir: tmpdir, workdir: workdir, path: path)
         .concat(command)
-        .then { |params| shell.sh(*params, exception: exception, silent: silent) }
-    end
-
-    # @param [String, nil] path
-    # @param [Struct] user
-    #
-    # @return [Command]
-    def command_for(user:, path: nil)
-      Command.new(image: image, env_file: env_file, user: user, tmpdir: tmpdir, workdir: workdir, path: path)
+        .call(exception: exception, silent: silent)
     end
 
     # Get workdir used inside docker container.
@@ -150,11 +142,6 @@ module Aldine::Local::Docker
     # @return [Module<::FileUtils>, Module<::FileUtils::Verbose>]
     def fs(**kwargs)
       shell.fs(**kwargs)
-    end
-
-    # @return [Module<::Aldine::Local::Shell>]
-    def shell
-      ::Aldine::Local::Shell
     end
 
     # @return [Module<::Aldine::Local::Tex>]
@@ -195,4 +182,3 @@ module Aldine::Local::Docker
     end
   end
 end
-# rubocop:enable Metrics/ModuleLength
