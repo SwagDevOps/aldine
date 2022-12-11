@@ -108,8 +108,8 @@ task :sync do
   ].each(&:call)
 end
 
-desc 'Vendorer setup'
-task :'vendorer:setup' do
+desc 'Vendorer install'
+task :'vendorer:install' do
   settings.get('container.workdir').then do |workdir|
     Dir.chdir(workdir) do
       ::Aldine::Remote::Vendorer.new.then { |vendorer| vendorer.file ? vendorer.call : [] }.then do |errors|

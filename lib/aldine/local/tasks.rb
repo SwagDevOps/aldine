@@ -62,7 +62,7 @@ task 'tex:sync': %w[docker:build setup] do
 end
 
 desc 'TeX build'
-task 'tex:build': %w[tex:sync] do
+task 'tex:build': %w[vendorer:install tex:sync] do
   Aldine::Local::Docker.rake(:all, path: settings.get('directories.tmp'))
 end
 
@@ -71,7 +71,7 @@ task 'tex:log': %w[docker:build setup] do
   Aldine::Local::Docker.rake(:log, path: settings.get('directories.src'))
 end
 
-desc 'Vendorer setup'
-task 'vendorer:setup': %w[docker:build setup] do
-  Aldine::Local::Docker.rake(:'vendorer:setup', path: settings.get('directories.tmp'))
+desc 'Vendorer install'
+task 'vendorer:install': %w[docker:build setup] do
+  Aldine::Local::Docker.rake(:'vendorer:install', path: settings.get('directories.tmp'))
 end
