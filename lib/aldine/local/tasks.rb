@@ -32,14 +32,6 @@ settings = Aldine::Settings.instance
 
 task default: [:'tex:build']
 
-unless Rake::Task.task_defined?(:setup)
-  desc 'Setup'
-  task :setup do
-    # @todo do something with the bin directory of gem?
-    # Bundler.locked_gems.specs.keep_if { |v| v.name == 'aldine' }.fetch(0).full_gem_path
-  end
-end
-
 desc 'Docker build'
 task :'docker:build' do
   Aldine::Local::Docker.build
@@ -47,17 +39,17 @@ task :'docker:build' do
 end
 
 desc 'Shell'
-task shell: %w[docker:build setup] do
+task shell: %w[docker:build] do
   Aldine::Local::Docker.run
 end
 
 desc 'Irb'
-task irb: %w[docker:build setup] do
+task irb: %w[docker:build] do
   Aldine::Local::Docker.rake(:shell, path: settings.get('directories.src'))
 end
 
 desc 'TeX sync'
-task 'tex:sync': %w[docker:build setup] do
+task 'tex:sync': %w[docker:build] do
   Aldine::Local::Docker.rake(:sync, path: settings.get('directories.src'))
 end
 
@@ -67,11 +59,11 @@ task 'tex:build': %w[vendorer:install tex:sync] do
 end
 
 desc 'TeX log'
-task 'tex:log': %w[docker:build setup] do
+task 'tex:log': %w[docker:build] do
   Aldine::Local::Docker.rake(:log, path: settings.get('directories.src'))
 end
 
 desc 'Vendorer install'
-task 'vendorer:install': %w[docker:build setup] do
+task 'vendorer:install': %w[docker:build] do
   Aldine::Local::Docker.rake(:'vendorer:install', path: settings.get('directories.tmp'))
 end
