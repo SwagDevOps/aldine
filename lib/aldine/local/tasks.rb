@@ -65,5 +65,5 @@ end
 
 desc 'Vendorer install'
 task 'vendorer:install': %w[docker:build] do
-  Aldine::Local::Docker.rake(:'vendorer:install', path: settings.get('directories.tmp'))
+  Aldine::Local::Docker.rake(:'vendorer:install', path: settings.get('directories.src'))
 end
