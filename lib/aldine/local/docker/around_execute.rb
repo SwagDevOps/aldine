@@ -13,6 +13,8 @@ require_relative '../docker'
 # Wrap docker run commands.
 #
 # Create directories and create files used as volumes.
+#
+# @see Aldine::Local::Docker::Commands::RunCommand#bundle_dirs
 class Aldine::Local::Docker::AroundExecute
   include(::Aldine::Concerns::SettingsAware)
   include(::Aldine::Concerns::HasLocalShell)
@@ -26,14 +28,25 @@ class Aldine::Local::Docker::AroundExecute
   def initialize(directories, tmpdir:)
     super().tap do
       self.tmpdir = Pathname.new(tmpdir).freeze
-      %w[pack conf home].map { |dir| bundle_tmpdir.join(dir) }.then do |temp_dirs|
-        directories.dup.concat(temp_dirs).map { |fp| Pathname.new(fp) }
-      end.then { |v| self.directories = v }.freeze
+      directories.dup.concat(bundle_tmpdirs.values).map { |fp| Pathname.new(fp) }.tap do |v|
+        self.directories = v.freeze
+      end
     end.freeze
   end
 
   def call(&execute_stt)
     prepare.then { execute_stt.call }
+  end
+
+  # Get directories used for bundle share and persistance.
+  #
+  # @return [Hash{Symbol => Pathname}]
+  def bundle_tmpdirs
+    %w[pack conf home]
+      .map { |dir| [dir.to_sym, bundle_tmpdir.join(dir)] }
+      .concat([[:base, bundle_tmpdir]]) # base (root) of bundle_tmpdir - is first
+      .sort_by { |a| a.fetch(0) == :base ? '' : a.fetch(0).to_s }
+      .to_h
   end
 
   protected
@@ -71,6 +84,7 @@ class Aldine::Local::Docker::AroundExecute
       ].fetch(fp.file? ? 0 : 1).call
     end
   end
+
   # rubocop:enable Naming/MethodParameterName
 
   # @return [::Aldine::Utils::BundleConfig]

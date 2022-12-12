@@ -45,11 +45,11 @@ class Aldine::Local::Docker::Commands::RunCommand < Aldine::Local::Docker::Comma
                 '-e', "TERM=#{ENV.fetch('TERM', 'xterm')}",
                 '-e', "TMPDIR=#{tmpdir.remote}",
                 '-v', "#{tmpdir.local.realpath}:#{tmpdir.remote}",
-                '-v', "#{tmpdir.local.join('.sys/bundle/home').realpath}:#{env_file.fetch('BUNDLE_USER_HOME')}",
-                '-v', "#{tmpdir.local.join('.sys/bundle/pack').realpath}:#{workdir.join(bundle_basedir)}",
-                '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
+                '-v', "#{bundle_dirs.fetch(:home).realpath}:#{env_file.fetch('BUNDLE_USER_HOME')}",
+                '-v', "#{bundle_dirs.fetch(:pack).realpath}:#{workdir.join(bundle_basedir)}",
+                '-v', "#{bundle_dirs.fetch(:conf).realpath}:#{workdir.join('.bundle')}",
                 '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
-                '-v', "#{tmpdir.local.join('.sys/bundle/gems.locked').realpath}:#{workdir.join('gems.locked')}",
+                '-v', "#{bundle_dirs.fetch(:base).join('gems.locked').realpath}:#{workdir.join('gems.locked')}",
               ])
       .concat(volumes)
       .concat(vendorer.volume_for(shell.pwd, workdir))
@@ -61,7 +61,7 @@ class Aldine::Local::Docker::Commands::RunCommand < Aldine::Local::Docker::Comma
 
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
-  # @param [Array<String>]
+  # @param [Array<String>] command
   #
   # @return [self]
   def concat(command)
@@ -125,5 +125,14 @@ class Aldine::Local::Docker::Commands::RunCommand < Aldine::Local::Docker::Comma
   # @return [Aldine::Remote::Vendorer]
   def vendorer
     ::Aldine::Remote::Vendorer.new(shell.pwd)
+  end
+
+  # Get directories used for bundle share and persistance.
+  #
+  # @return [Hash{Symbol => Pathname}]
+  def bundle_dirs
+    ::Aldine::Local::Docker::AroundExecute
+      .new([], tmpdir: tmpdir.local.to_path)
+      .bundle_tmpdirs
   end
 end
