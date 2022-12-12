@@ -10,6 +10,8 @@
 
 require_relative '../local'
 
+# rubocop:disable Metrics/ModuleLength
+
 # Local to docker communication methods.
 module Aldine::Local::Docker
   autoload(:Pathname, 'pathname')
@@ -104,11 +106,24 @@ module Aldine::Local::Docker
     def around_execute(&execute_stt)
       fs(silent: true).then do |fs|
         directories.each { |dir| fs.mkdir_p(dir) }
-
         fs.cp(bundle_config.realpath, tmpdir.local.realpath.join('.sys/bundle/conf'))
+        copy_lockfile
         fs.rm_rf(tmpdir.local.join('.sys/bundle/home/config')) # ensure config is not present in home
       end.then { execute_stt.call }
     end
+
+    # Ensure ``gems.locked ``(used as a volume)
+    #
+    # rubocop:disable Metrics/AbcSize
+    def copy_lockfile
+      shell.pwd.join('gems.locked').then do |fp|
+        [
+          -> { fs.cp(fp, tmpdir.local.join('.sys/bundle')) },
+          -> { fs.touch(tmpdir.local.join(".sys/bundle/#{fp.basename}")) }
+        ].fetch(fp.file? ? 0 : 1).call
+      end
+    end
+    # rubocop:enable Metrics/AbcSize
 
     # Executes given command in a container.
     #
@@ -183,3 +198,4 @@ module Aldine::Local::Docker
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength

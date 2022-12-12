@@ -49,7 +49,7 @@ class Aldine::Local::Docker::Commands::RunCommand < Aldine::Local::Docker::Comma
                 '-v', "#{tmpdir.local.join('.sys/bundle/pack').realpath}:#{workdir.join(bundle_basedir)}",
                 '-v', "#{tmpdir.local.join('.sys/bundle/conf').realpath}:#{workdir.join('.bundle')}",
                 '-v', "#{shell.pwd.join('gems.rb').realpath}:#{workdir.join('gems.rb')}:ro",
-                '-v', "#{shell.pwd.join('gems.locked').realpath}:#{workdir.join('gems.locked')}:ro",
+                '-v', "#{tmpdir.local.join('.sys/bundle/gems.locked').realpath}:#{workdir.join('gems.locked')}",
               ])
       .concat(volumes)
       .concat(vendorer.volume_for(shell.pwd, workdir))
