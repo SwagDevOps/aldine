@@ -21,7 +21,8 @@ class Aldine::Local::Docker::Commands::RunCommand < Aldine::Local::Docker::Comma
   # @param [Struct] tmpdir
   # @param [String, nil] path - path relative to workdir from where command will be run
   def initialize(image:, env_file:, user:, workdir:, tmpdir:, path:)
-    super.tap do
+    super
+    self.providers_init.then do
       self.image = image
       self.env_file = env_file
       self.user = user
@@ -29,7 +30,7 @@ class Aldine::Local::Docker::Commands::RunCommand < Aldine::Local::Docker::Comma
       self.tmpdir = tmpdir
       self.path = path
       self.command = []
-    end.freeze
+    end
   end
 
   # rubocop:enable Metrics/ParameterLists
@@ -95,6 +96,26 @@ class Aldine::Local::Docker::Commands::RunCommand < Aldine::Local::Docker::Comma
   # @type [Array<String>]
   attr_accessor :command
 
+  # @return [Class<::Aldine::Local::Docker::BundleTmpDirsProvider>]
+  attr_accessor :bundle_tmp_dirs_provider
+
+  # @return [Proc]
+  attr_accessor :bundle_config_provider
+
+  # @return [Proc]
+  attr_accessor :vendorer_provider
+
+  # @return [self]
+  def providers_init
+    self.tap do |instance|
+      {
+        bundle_tmp_dirs_provider: ::Aldine::Local::Docker::BundleTmpDirsProvider,
+        bundle_config_provider: -> { ::Aldine::Utils::BundleConfig.new(shell.pwd) },
+        vendorer_provider: -> { ::Aldine::Remote::Vendorer.new(shell.pwd) },
+      }.each { |k, v| instance.__send__("#{k}=", v) }
+    end
+  end
+
   # Options for volumes (from directories settings).
   #
   # @return [Array<String>]
@@ -108,9 +129,7 @@ class Aldine::Local::Docker::Commands::RunCommand < Aldine::Local::Docker::Comma
 
   # @return [::Aldine::Utils::BundleConfig]
   def bundle_config
-    shell.pwd.then do |basedir|
-      ::Aldine::Utils::BundleConfig.new(basedir)
-    end
+    bundle_config_provider.call
   end
 
   # @return [String]
@@ -124,15 +143,13 @@ class Aldine::Local::Docker::Commands::RunCommand < Aldine::Local::Docker::Comma
   #
   # @return [Aldine::Remote::Vendorer]
   def vendorer
-    ::Aldine::Remote::Vendorer.new(shell.pwd)
+    vendorer_provider.call
   end
 
   # Get directories used for bundle share and persistance.
   #
   # @return [Hash{Symbol => Pathname}]
   def bundle_dirs
-    ::Aldine::Local::Docker::AroundExecute
-      .new([], tmpdir: tmpdir.local.to_path)
-      .bundle_tmpdirs
+    bundle_tmp_dirs_provider.call(tmpdir: tmpdir.local)
   end
 end

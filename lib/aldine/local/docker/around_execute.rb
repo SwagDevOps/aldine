@@ -20,13 +20,11 @@ class Aldine::Local::Docker::AroundExecute
   include(::Aldine::Concerns::HasLocalShell)
   include(::Aldine::Concerns::HasLocalFileSystem)
 
-  # @api private
-  TMP_BUNDLE_PATH = '.sys/bundle'
-
   # @param [Array<String, Pathname>] directories
   # @param [String] tmpdir
   def initialize(directories, tmpdir:)
-    super().tap do
+    super()
+    self.providers_init.tap do
       self.tmpdir = Pathname.new(tmpdir).freeze
       directories.dup.concat(bundle_tmpdirs.values).map { |fp| Pathname.new(fp) }.tap do |v|
         self.directories = v.freeze
@@ -42,11 +40,7 @@ class Aldine::Local::Docker::AroundExecute
   #
   # @return [Hash{Symbol => Pathname}]
   def bundle_tmpdirs
-    %w[pack conf home]
-      .map { |dir| [dir.to_sym, bundle_tmpdir.join(dir)] }
-      .concat([[:base, bundle_tmpdir]]) # base (root) of bundle_tmpdir - is first
-      .sort_by { |a| a.fetch(0) == :base ? '' : a.fetch(0).to_s }
-      .to_h
+    bundle_tmp_dirs_provider.call(tmpdir: self.tmpdir)
   end
 
   protected
@@ -56,6 +50,22 @@ class Aldine::Local::Docker::AroundExecute
 
   # @return [Pathname]
   attr_accessor :tmpdir
+
+  # @return [Proc]
+  attr_accessor :bundle_config_provider
+
+  # @return [Class<::Aldine::Local::Docker::BundleTmpDirsProvider>]
+  attr_accessor :bundle_tmp_dirs_provider
+
+  # @return [self]
+  def providers_init
+    self.tap do |instance|
+      {
+        bundle_tmp_dirs_provider: ::Aldine::Local::Docker::BundleTmpDirsProvider,
+        bundle_config_provider: -> { ::Aldine::Utils::BundleConfig.new(shell.pwd) },
+      }.each { |k, v| instance.__send__("#{k}=", v) }
+    end
+  end
 
   # rubocop:disable Naming/MethodParameterName
 
@@ -89,10 +99,11 @@ class Aldine::Local::Docker::AroundExecute
 
   # @return [::Aldine::Utils::BundleConfig]
   def bundle_config
-    ::Aldine::Utils::BundleConfig.new(shell.pwd)
+    bundle_config_provider.call
   end
 
+  # @return [Pathname]
   def bundle_tmpdir
-    self.tmpdir.join(TMP_BUNDLE_PATH)
+    bundle_tmpdirs.fetch(:base)
   end
 end

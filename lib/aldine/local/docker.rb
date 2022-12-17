@@ -17,6 +17,7 @@ module Aldine::Local::Docker
   __FILE__.gsub(/\.rb$/, '').tap do |path|
     {
       AroundExecute: :around_execute,
+      BundleTmpDirsProvider: :bundle_tmp_dirs_provider,
       Command: :command,
       Commands: :commands,
       EnvFile: :env_file,
