@@ -6,8 +6,8 @@
 # noinspection RubyLiteralArrayInspection
 Gem::Specification.new do |s|
   s.name        = "aldine"
-  s.version     = "0.0.8"
-  s.date        = "2022-12-11"
+  s.version     = "0.0.9"
+  s.date        = "2022-12-18"
   s.summary     = "Utilities and build system on top of LaTeX"
   s.description = "Light utilities for LaTeX (standalone document preparation system)"
 
@@ -53,15 +53,23 @@ Gem::Specification.new do |s|
     "lib/aldine/concerns/freezable.rb",
     "lib/aldine/concerns/freezer.rb",
     "lib/aldine/concerns/has_inflector.rb",
+    "lib/aldine/concerns/has_local_file_system.rb",
+    "lib/aldine/concerns/has_local_shell.rb",
     "lib/aldine/concerns/settings_aware.rb",
     "lib/aldine/dotenv_loader.rb",
     "lib/aldine/local.rb",
     "lib/aldine/local/docker.rb",
-    "lib/aldine/local/docker/command.rb",
+    "lib/aldine/local/docker/around_execute.rb",
+    "lib/aldine/local/docker/bundle_tmp_dirs_provider.rb",
+    "lib/aldine/local/docker/commands.rb",
+    "lib/aldine/local/docker/commands/base_command.rb",
+    "lib/aldine/local/docker/commands/build_command.rb",
+    "lib/aldine/local/docker/commands/run_command.rb",
     "lib/aldine/local/docker/env_file.rb",
     "lib/aldine/local/docker/image_namer.rb",
     "lib/aldine/local/docker/rake_runner.rb",
     "lib/aldine/local/resources/container.env",
+    "lib/aldine/local/resources/docker/Dockerfile",
     "lib/aldine/local/shell.rb",
     "lib/aldine/local/tasks.rb",
     "lib/aldine/local/tex.rb",

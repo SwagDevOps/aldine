@@ -10,15 +10,16 @@
 
 require_relative '../local'
 
-# rubocop:disable Metrics/ModuleLength
-
 # Local to docker communication methods.
 module Aldine::Local::Docker
   autoload(:Pathname, 'pathname')
 
   __FILE__.gsub(/\.rb$/, '').tap do |path|
     {
+      AroundExecute: :around_execute,
+      BundleTmpDirsProvider: :bundle_tmp_dirs_provider,
       Command: :command,
+      Commands: :commands,
       EnvFile: :env_file,
       ImageNamer: :image_namer,
       RakeRunner: :rake_runner,
@@ -27,40 +28,14 @@ module Aldine::Local::Docker
 
   class << self
     include(::Aldine::Concerns::SettingsAware)
-
-    # Get current UNIX user.
-    #
-    # @see https://ruby-doc.org/stdlib-2.5.3/libdoc/etc/rdoc/Etc.html#method-c-getpwnam
-    #
-    # @return [Struct]
-    def user
-      shell.user
-    end
-
-    # Get image name.
-    #
-    # @return [String]
-    def image
-      ImageNamer.new(user: user).call
-    end
-
-    # Get list of directories used by docker.
-    #
-    # @return [Array<String>]
-    def directories
-      # rubocop:disable Style/RedundantParentheses
-      (settings.get('directories').values) # tex directories
-        .concat(%w[pack conf home].map { |dir| ".tmp/.sys/bundle/#{dir}" }) # bundle vendoring + config + home
-        .sort
-        .freeze
-      # rubocop:enable Style/RedundantParentheses
-    end
+    include(::Aldine::Concerns::HasLocalShell)
+    include(::Aldine::Concerns::HasLocalFileSystem)
 
     # Build docker image.
     #
     # @return [Process::Status]
     def build
-      shell.sh('/usr/bin/env', 'docker', 'build', '-t', image, './docker')
+      Commands::BuildCommand.new(image: image).call
     end
 
     # Executes given command in a container.
@@ -96,16 +71,34 @@ module Aldine::Local::Docker
 
     protected
 
+    # Get current UNIX user.
+    #
+    # @see https://ruby-doc.org/stdlib-2.5.3/libdoc/etc/rdoc/Etc.html#method-c-getpwnam
+    #
+    # @return [Struct]
+    def user
+      shell.user
+    end
+
+    # Get image name.
+    #
+    # @return [String]
+    def image
+      ImageNamer.new(user: user).call
+    end
+
+    # Get list of directories used by docker.
+    #
+    # @return [Array<String>]
+    def directories
+      settings.get('directories').values.sort.freeze
+    end
+
     # Wrap (and prepare) docker execution.
     #
     # @return [Process::Status]
     def around_execute(&execute_stt)
-      fs(silent: true).then do |fs|
-        directories.each { |dir| fs.mkdir_p(dir) }
-
-        fs.cp(bundle_config.realpath, tmpdir.local.realpath.join('.sys/bundle/conf'))
-        fs.rm_rf(tmpdir.local.join('.sys/bundle/home/config')) # ensure config is not present in home
-      end.then { execute_stt.call }
+      AroundExecute.new(directories, tmpdir: tmpdir.local.to_path).call(&execute_stt)
     end
 
     # Executes given command in a container.
@@ -116,25 +109,17 @@ module Aldine::Local::Docker
     #
     # @return [Process::Status]
     def execute(command = [], user:, path: nil, exception: true, silent: false)
-      command_for(user: user, path: path)
-        .to_a
+      Commands::RunCommand
+        .new(image: image, env_file: env_file, user: user, tmpdir: tmpdir, workdir: workdir, path: path)
         .concat(command)
-        .then { |params| shell.sh(*params, exception: exception, silent: silent) }
-    end
-
-    # @param [String, nil] path
-    # @param [Struct] user
-    #
-    # @return [Command]
-    def command_for(user:, path: nil)
-      Command.new(image: image, env_file: env_file, user: user, tmpdir: tmpdir, workdir: workdir, path: path)
+        .call(exception: exception, silent: silent)
     end
 
     # Get workdir used inside docker container.
     #
     # @return [Pathname]
     def workdir
-      Pathname.new(env_file.fetch('WORKDIR'))
+      Pathname.new(settings.get('container.build.args.workdir'))
     end
 
     # Get an object representation of the ``tmpdir`` with local and remote paths.
@@ -145,16 +130,6 @@ module Aldine::Local::Docker
         local: shell.pwd.expand_path.join('.tmp'),
         remote: Pathname.new("/tmp/u#{user.uid}"),
       }.then { |paths| Struct.new(*paths.keys, keyword_init: true).new(**paths) }
-    end
-
-    # @return [Module<::FileUtils>, Module<::FileUtils::Verbose>]
-    def fs(**kwargs)
-      shell.fs(**kwargs)
-    end
-
-    # @return [Module<::Aldine::Local::Shell>]
-    def shell
-      ::Aldine::Local::Shell
     end
 
     # @return [Module<::Aldine::Local::Tex>]
@@ -169,10 +144,7 @@ module Aldine::Local::Docker
           BUNDLE_USER_HOME: '/tmp/bundle',
           TERM: ENV.fetch('TERM', 'xterm'),
           TMPDIR: tmpdir.remote,
-          WORKDIR: settings.get('container.workdir'),
-        }.then do |defaults|
-          ::Aldine::Local::Docker::EnvFile.new(defaults: defaults)
-        end
+        }.then { |defaults| EnvFile.new(defaults: defaults) }
       end
     end
 
@@ -188,11 +160,5 @@ module Aldine::Local::Docker
         ::Aldine::Local::Docker::RakeRunner.new(runner)
       end
     end
-
-    # @return [::Aldine::Utils::BundleConfig]
-    def bundle_config
-      ::Aldine::Utils::BundleConfig.new(shell.pwd)
-    end
   end
 end
-# rubocop:enable Metrics/ModuleLength

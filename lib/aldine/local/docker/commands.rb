@@ -8,18 +8,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../aldine'
+require_relative '../docker'
 
-# Namespace module for concerns.
-module Aldine::Concerns
-  "#{__dir__}/concerns".then do |libdir|
+# Namespace module for commands.
+module Aldine::Local::Docker::Commands
+  __FILE__.gsub(/\.rb$/, '').tap do |path|
     {
-      Freezable: :freezable,
-      Freezer: :freezer,
-      HasInflector: :has_inflector,
-      HasLocalFileSystem: :has_local_file_system,
-      HasLocalShell: :has_local_shell,
-      SettingsAware: :settings_aware,
-    }.each { |k, v| autoload(k, "#{libdir}/#{v}") }
+      BaseCommand: :base_command,
+      BuildCommand: :build_command,
+      RunCommand: :run_command,
+    }.each { |k, v| autoload(k, "#{path}/#{v}") }
   end
 end

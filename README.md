@@ -32,7 +32,7 @@ See also:
 
 ## Developper
 
-### Replacement ``Rakefile`` in ``tmp`` directory
+### Replacement ``Rakefile`` in ``src`` and ``tmp`` directory
 
 ```ruby
 # frozen_string_literal: true                                                                 

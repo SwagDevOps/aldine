@@ -8,18 +8,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../aldine'
+require_relative '../commands'
 
-# Namespace module for concerns.
-module Aldine::Concerns
-  "#{__dir__}/concerns".then do |libdir|
-    {
-      Freezable: :freezable,
-      Freezer: :freezer,
-      HasInflector: :has_inflector,
-      HasLocalFileSystem: :has_local_file_system,
-      HasLocalShell: :has_local_shell,
-      SettingsAware: :settings_aware,
-    }.each { |k, v| autoload(k, "#{libdir}/#{v}") }
+# Base command.
+#
+# @abstract
+class Aldine::Local::Docker::Commands::BaseCommand
+  include(::Aldine::Concerns::SettingsAware)
+  include(::Aldine::Concerns::HasLocalShell)
+
+  def initialize(*)
+    super()
+  end
+
+  # @abstract
+  #
+  # @return [Array<String>]
+  def to_a
+    %w[/usr/bin/env docker]
+  end
+
+  # @return [Process::Status]
+  def call(exception: true, silent: false)
+    self.shell.sh(*self.to_a, exception: exception, silent: silent)
   end
 end

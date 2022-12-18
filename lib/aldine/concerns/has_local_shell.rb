@@ -8,18 +8,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../aldine'
+require_relative '../concerns'
 
-# Namespace module for concerns.
-module Aldine::Concerns
-  "#{__dir__}/concerns".then do |libdir|
-    {
-      Freezable: :freezable,
-      Freezer: :freezer,
-      HasInflector: :has_inflector,
-      HasLocalFileSystem: :has_local_file_system,
-      HasLocalShell: :has_local_shell,
-      SettingsAware: :settings_aware,
-    }.each { |k, v| autoload(k, "#{libdir}/#{v}") }
+# Provides access to ``shell``.
+module Aldine::Concerns::HasLocalShell
+  protected
+
+  # @return [Module<::Aldine::Local::Shell>]
+  def shell
+    ::Aldine::Local::Shell
   end
 end
