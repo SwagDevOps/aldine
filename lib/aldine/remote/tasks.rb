@@ -17,11 +17,24 @@ autoload(:FileUtils, 'fileutils')
 
 # variables -----------------------------------------------------------
 
-path = Aldine::Remote::Path
-settings = Aldine::Settings.instance
-fs = FileUtils::Verbose
+path = ::Aldine::Remote::Path
+fs = ::FileUtils::Verbose
 pdf = lambda do |type|
-  Aldine::Remote::PdfBuilder.new(type).call.tap { |file| fs.mv(file, path.call('out')) }
+  ::Aldine::Remote::PdfBuilder
+    .new(type)
+    .call.tap { |file| fs.mv(file, path.call('out').to_path) }
+end
+
+# mixins ----------------------------------------------------------------------
+
+[
+  ::Aldine::Concerns::SettingsAware,
+].each { |mixin| self.__send__(:include, mixin) }
+
+# @note Mixins documentation only (IDE helper).
+class Object
+  # @!method settings()
+  #   @return [Aldine::Settings]
 end
 
 # constants -----------------------------------------------------------
@@ -32,7 +45,7 @@ PDF_TYPES = lambda do
       fname.gsub(/^#{settings.get('latex_name')}\./, '').gsub(/\.tex/, '').to_sym
     end.sort
   end
-end.call
+end.call.freeze
 
 # tasks ---------------------------------------------------------------
 task default: [:all]

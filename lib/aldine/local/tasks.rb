@@ -26,7 +26,19 @@ end
 
 # variables -----------------------------------------------------------------
 
-settings = Aldine::Settings.instance
+docker = ::Aldine::Local::Docker
+
+# mixins ----------------------------------------------------------------------
+
+[
+  ::Aldine::Concerns::SettingsAware,
+].each { |mixin| self.__send__(:include, mixin) }
+
+# @note Mixins documentation only (IDE helper).
+class Object
+  # @!method settings()
+  #   @return [Aldine::Settings]
+end
 
 # tasks ----------------------------------------------------------------------
 
@@ -34,36 +46,36 @@ task default: [:'tex:build']
 
 desc 'Docker build'
 task :'docker:build' do
-  Aldine::Local::Docker.build
-  Aldine::Local::Docker.install
+  docker.build
+  docker.install
 end
 
 desc 'Shell'
 task shell: %w[docker:build] do
-  Aldine::Local::Docker.run
+  docker.run
 end
 
 desc 'Irb'
 task irb: %w[docker:build] do
-  Aldine::Local::Docker.rake(:shell, path: settings.get('directories.src'))
+  docker.rake(:shell, path: settings.get('directories.src'))
 end
 
 desc 'TeX sync'
 task 'tex:sync': %w[docker:build] do
-  Aldine::Local::Docker.rake(:sync, path: settings.get('directories.src'))
+  docker.rake(:sync, path: settings.get('directories.src'))
 end
 
 desc 'TeX build'
 task 'tex:build': %w[vendorer:install tex:sync] do
-  Aldine::Local::Docker.rake(:all, path: settings.get('directories.tmp'))
+  docker.rake(:all, path: settings.get('directories.tmp'))
 end
 
 desc 'TeX log'
 task 'tex:log': %w[docker:build] do
-  Aldine::Local::Docker.rake(:log, path: settings.get('directories.src'))
+  docker.rake(:log, path: settings.get('directories.src'))
 end
 
 desc 'Vendorer install'
 task 'vendorer:install': %w[docker:build] do
-  Aldine::Local::Docker.rake(:'vendorer:install', path: settings.get('directories.src'))
+  docker.rake(:'vendorer:install', path: settings.get('directories.src'))
 end
