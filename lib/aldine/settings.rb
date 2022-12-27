@@ -12,12 +12,17 @@ require_relative '../aldine'
 
 # Singleton access to settings extracted from the environment.
 class Aldine::Settings
+  autoload(:Digest, 'digest')
+  autoload(:JSON, 'json')
+
   "#{__dir__}/settings".then do |libdir|
     {
       Parsed: :parsed,
       Parser: :parser,
     }.each { |k, v| autoload(k, "#{libdir}/#{v}") }
   end
+
+  attr_reader :control
 
   # Access the payload with a dot-notation.
   #
@@ -37,9 +42,32 @@ class Aldine::Settings
     end
   end
 
+  # Set value on given path (on ENV), then settings have to be reloaded to reflect changes.
+  #
+  # @param [String, Symbol] path
+  # @param [Object] value
+  #
+  # @return [Boolean] denote value has been set on source (``ENV``)
+  def set(path, value)
+    [settings_namespace].concat(split(path)).map(&:upcase).join('__').then do |key|
+      YAML.dump(value).then do |v|
+        self.source.nil? ? false : (self.source[key] = v).then { true }
+      end
+    end
+  end
+
   # @return [Hash{Symbol => Object}]
   def to_h
-    self.payload
+    self.payload.dup
+  end
+
+  # Get an instance without write access.
+  #
+  # @return [self]
+  def read_only
+    self.clone.tap do |instance|
+      instance.singleton_class.__send__(:protected, :set)
+    end
   end
 
   protected
@@ -47,9 +75,20 @@ class Aldine::Settings
   # @return [Hash{Symbol => Object}]
   attr_reader :payload
 
+  # @return [Class<ENV>, nil]
+  attr_reader :source
+
+  # @return [String]
+  attr_writer :control
+
   # @param [Hash{String => String}, nil] payload
-  def initialize(payload = nil)
-    @payload = Parser.new(settings_namespace, payload || ENV.to_h).call(&:deep_freeze)
+  # @param [Class<ENV>, nil] source
+  def initialize(payload: nil, source: nil)
+    payload ||= (source || self.class.__send__(:source)).to_h
+
+    @source = source
+    @control = self.class.__send__(:hexdigest, payload)
+    @payload = Parser.new(settings_namespace, payload.to_h).call(&:deep_freeze)
   end
 
   def settings_namespace
@@ -66,13 +105,38 @@ class Aldine::Settings
   end
 
   class << self
+    # @return [Aldine::Settings]
     def instance
-      # @todo renew instance when env changes.
-      self.instance = @instance || self.new
+      self.source.to_h.then do |payload|
+        if self.control != self.hexdigest(payload)
+          self.new(source: self.source, payload: payload).tap do |instance|
+            self.instance = instance
+            self.control = instance.control
+          end
+        end
+
+        @instance
+      end
     end
 
     protected
 
+    # @return [self]
     attr_writer :instance
+
+    # @return [String, nil]
+    attr_accessor :control
+
+    # @return [Class<ENV>]
+    def source
+      ENV
+    end
+
+    # @param [Object] payload
+    #
+    # @return [String]
+    def hexdigest(payload)
+      JSON.generate(payload).then { |str| Digest::SHA2.hexdigest(str) }
+    end
   end
 end
