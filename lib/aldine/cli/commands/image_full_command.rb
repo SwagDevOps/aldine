@@ -31,6 +31,8 @@ class Aldine::Cli::Commands::ImageFullCommand < Aldine::Cli::Base::ErbCommand
   def variables_builder
     lambda do
       {
+        caption: nil, # @todo add an option to set caption
+        label: nil, # @todo add an option to set label
         input_file: self.input_file,
         image_file: input_file.extname == '.svg' ? svg_convert(input_file) : input_file,
       }

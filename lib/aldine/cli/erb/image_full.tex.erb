@@ -1,10 +1,14 @@
 %! suppress = MissingImport
 % see: https://stackoverflow.com/questions/1963923/adding-full-page-figures-in-latex-how
-\begin{figure}[ptbh]
-    \vspace*{-0cm}
-    \makebox[\linewidth]{
-        \centerline{
-            \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{<%= image_file %>}
-        }
-    }
-\end{figure}
+% see: https://latex-tutorial.com/wide-figure-two-column-document/
+% see: https://www.overleaf.com/learn/latex/Referencing_Figures
+\begin{figure*}
+    \centering
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{<%= image_file %>}
+    <% if caption %>
+    \caption{<%= caption %>}
+    <% end %>
+    <% if label %>
+    \label{<%= label %>}
+    <% end %>
+\end{figure*}
