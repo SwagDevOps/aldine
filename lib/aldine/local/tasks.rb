@@ -27,6 +27,7 @@ end
 # variables -----------------------------------------------------------------
 
 docker = ::Aldine::Local::Docker
+tex = ::Aldine::Local::Tex
 
 # mixins ----------------------------------------------------------------------
 
@@ -66,8 +67,17 @@ task 'tex:sync': %w[docker:build] do
 end
 
 desc 'TeX build'
-task 'tex:build': %w[vendorer:install tex:sync] do
+task 'tex:build': %w[tex:install vendorer:install tex:sync] do
   docker.rake(:all, path: settings.get('directories.tmp'))
+end
+
+desc 'Install provided TeX packages'
+task 'tex:install' do
+  tex.installer.call.then do |packages|
+    if packages.is_a?(Array) and !packages.empty?
+      puts('installed packages: %s' % packages.join(', '))
+    end
+  end
 end
 
 desc 'TeX log'

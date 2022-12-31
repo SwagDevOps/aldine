@@ -10,22 +10,18 @@
 
 require_relative '../local'
 
-# Tex project related methods.
+# Tex project related module.
 module Aldine::Local::Tex
+  __FILE__.gsub(/\.rb$/, '').tap do |path|
+    {
+      Installer: :installer,
+    }.each { |k, v| autoload(k, "#{path}/#{v}") }
+  end
+
   class << self
-    include(::Aldine::Concerns::SettingsAware)
-
-    # @return [String]
-    def project_name
-      settings.get('output_name').tap do |value|
-        if value.to_s.empty?
-          # rubocop:disable Style/RedundantException
-          raise RuntimeError, 'Output name can not be nil'
-          # rubocop:enable Style/RedundantException
-        end
-      end.to_s
+    # @return [Installer]
+    def installer
+      Installer.new
     end
-
-    alias output_name project_name
   end
 end

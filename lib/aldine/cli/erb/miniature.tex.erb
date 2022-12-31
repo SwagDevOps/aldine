@@ -1,3 +1,11 @@
-\begin{floatingfigure}[<%= position %>]{<%= dimensions.fetch(0) %>cm}
+% see: https://tex.stackexchange.com/questions/57178/inserting-an-image-on-the-right
+\begin{wrapfigure}{<%= position %>}{<%= dimensions.fetch(0) %>cm}
+    \centering
     \includegraphics[width=<%= dimensions.fetch(1) %>cm,keepaspectratio]{<%= image_file %>}
-\end{floatingfigure}
+    <% if caption %>
+        \caption{<%= caption %>}
+    <% end %>
+    <% if label %>
+        \label{<%= label %>}
+    <% end %>
+\end{wrapfigure}

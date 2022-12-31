@@ -47,6 +47,16 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
   # @!attribute [rw] param_position
   #   @return [String, nil]
 
+  # @!method floating?
+  #   Denote image is supposed to float.
+  #
+  #   The capital ``L`` or ``R`` ()instead of lower case ``l`` or ``r``)
+  #   to have the image float on the page.
+  #   Placing it with lower case letters will have the image displayed exactly where it was defined.
+  #   This could e.g. result in an image displayed kind of 'between' two pages.
+  #
+  #   @return [Boolean]
+
   # set command options
   begin
     {
@@ -57,6 +67,8 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
         option("--#{k}", k.to_s.upcase, desc, opts) { |s| Float(s) }
       end
     end
+
+    option('--floating', :flag, 'miniature is floating')
 
     {
       default: self.defaults.fetch(:position),
@@ -85,6 +97,8 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
   def position
     (self.param_position || self.defaults.fetch(:position)).then do |position|
       self.class.__send__(:positions).fetch(position.to_sym, position).to_s
+    end.then do |position|
+      position.__send__(self.floating? ? :upcase : :downcase)
     end
   end
 
@@ -121,6 +135,8 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
   def variables_builder
     lambda do
       {
+        caption: nil, # @todo add an option to set caption
+        label: nil, # @todo add an option to set label
         input_file: self.input_file,
         image_file: input_file.extname == '.svg' ? svg_convert(input_file) : input_file,
         dimensions: self.dimensions,
