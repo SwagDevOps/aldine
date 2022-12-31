@@ -132,11 +132,6 @@ module Aldine::Local::Docker
       }.then { |paths| Struct.new(*paths.keys, keyword_init: true).new(**paths) }
     end
 
-    # @return [Module<::Aldine::Local::Tex>]
-    def tex
-      ::Aldine::Local::Tex
-    end
-
     # @return [::Aldine::Local::Docker::EnvFile]
     def env_file
       ::Aldine.dotenv.then do

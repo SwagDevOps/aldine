@@ -1,0 +1,63 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Aldine package
+%
+% Project repository and bug tracker:
+% https://github.com/SwagDevOps/aldine
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ProvidesPackage{aldine}[2022/12/31 v0.0.1 Aldine package]
+
+% packages from CLI commands templates --------------------------------
+
+\RequirePackage{graphicx}
+\RequirePackage{hyperref}
+
+% packages used in commands below -------------------------------------
+
+\RequirePackage{ifthen}  % provides conditonals...
+\RequirePackage{xargs}   % uses a key-value package to define the layout of the optional arguments: \newcommandx{\foo}[3][1=1, 3=n]{...}
+
+% emptypage -----------------------------------------------------------
+
+\newcommandx*{\aldineEmptyPage}[1][1=false] {
+  \null
+  \thispagestyle{empty}
+  \ifthenelse{\equal{\#1}{true}} { \addtocounter{page}{-1} } {}
+  \newpage
+}
+
+% commands ------------------------------------------------------------
+
+\newcommand*{\aldineMarkdown}[1] {
+  % todo provide a command from aldine CLI commands
+  \immediate\write18{pandoc -t latex -o #1.markdown.tex #1.md}
+  \input{#1.markdown}
+}
+
+% aldine --------------------------------------------------------------
+
+\newcommand*{\aldineSvgConv}[1] {
+  \immediate\write18{aldine svg-conv #1}
+}
+
+\newcommand*{\aldineBlason}[1] {
+  \immediate\write18{aldine miniature --floating #1}
+  \input{#1.erb-miniature}
+}
+
+\newcommand*{\aldineChapters}[1] {
+  \immediate\write18{aldine chapters #1}
+  \input{#1.erb-chapters}
+}
+
+\newcommand*{\aldineHyperrefSetup}[1] {
+  \immediate\write18{aldine hyperref-setup #1}
+  \input{#1.erb-hyperref_setup}
+}
+
+\newcommand*{\aldineImageFull}[1] {
+  \immediate\write18{aldine image-full #1}
+  \input{#1.erb-image_full}
+}
