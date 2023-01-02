@@ -68,7 +68,7 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
       end
     end
 
-    option('--floating', :flag, 'miniature is floating')
+    option('--[no-]floating', :flag, 'miniature is floating')
 
     {
       default: self.defaults.fetch(:position),
