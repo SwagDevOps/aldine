@@ -30,6 +30,21 @@ See also:
 * [Dotenv][bkeepers/dotenv]
 * [Dotenv Validator][fastruby/dotenv_validator]
 
+## Aliasing
+
+Commands provided by the package can be aliased (to be more semantic), as the following __example__:
+
+```latex
+% aldine --------------------------------------------------------------
+\DeclareCommandCopy\emptypage\aldineEmptyPage
+\DeclareCommandCopy\markdown\aldineMarkdown
+\DeclareCommandCopy\svgconv\aldineSvgConv
+\DeclareCommandCopy\blason\aldineBlason
+\DeclareCommandCopy\chapters\aldineChapters
+\DeclareCommandCopy\hyperrefSetup\aldineHyperrefSetup
+\DeclareCommandCopy\imageFull\aldineImageFull
+```
+
 ## Developper
 
 ### Replacement ``Rakefile`` in ``src`` and ``tmp`` directory
