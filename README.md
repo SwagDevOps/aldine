@@ -47,6 +47,19 @@ Commands provided by the package can be aliased (to be more semantic), as the fo
 
 ## Developper
 
+### Environment
+
+```dotenv
+# file: .env.local
+
+ALDINE__DIRECTORIES__LIB=tex
+ALDINE__DIRECTORIES__RUBY=lib
+```
+
+Dotenv above changes ``lib`` to ``tex`` for tex packages,
+and add ruby ``lib`` directory to mounted directories.
+It assumes working from the current sources directory.
+
 ### Replacement ``Rakefile`` in ``src`` and ``tmp`` directory
 
 ```ruby
