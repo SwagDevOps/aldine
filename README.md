@@ -32,7 +32,7 @@ See also:
 
 ## Aliasing
 
-Commands provided by the package can be aliased (to be more semantic), as the following __example__:
+LaTeX commands provided by the package can be aliased (to be more semantic), as the following __example__:
 
 ```latex
 % aldine --------------------------------------------------------------
@@ -63,7 +63,7 @@ It assumes working from the current sources directory.
 ### Replacement ``Rakefile`` in ``src`` and ``tmp`` directory
 
 ```ruby
-# frozen_string_literal: true                                                                 
+# frozen_string_literal: true
 
 require 'bundler/setup'
 require '/workdir/lib/aldine'
