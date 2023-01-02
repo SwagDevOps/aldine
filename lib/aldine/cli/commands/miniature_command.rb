@@ -50,7 +50,7 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
   # @!method floating?
   #   Denote image is supposed to float.
   #
-  #   The capital ``L`` or ``R`` ()instead of lower case ``l`` or ``r``)
+  #   The capital ``L`` or ``R`` (instead of lower case ``l`` or ``r``)
   #   to have the image float on the page.
   #   Placing it with lower case letters will have the image displayed exactly where it was defined.
   #   This could e.g. result in an image displayed kind of 'between' two pages.
