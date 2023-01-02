@@ -144,6 +144,10 @@ class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
   #
   # @return [String]
   def template_name
-    self.class.name.split('::').last.gsub(/(.)([A-Z])/, '\1_\2').downcase.gsub(/_command$/, '')
+    self.class.name.then do |class_name|
+      raise RuntimeError, 'Can not get class name' unless class_name
+
+      class_name.split('::').last.gsub(/(.)([A-Z])/, '\1_\2').downcase.gsub(/_command$/, '')
+    end
   end
 end
