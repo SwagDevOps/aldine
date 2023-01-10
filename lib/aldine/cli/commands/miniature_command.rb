@@ -13,10 +13,7 @@ require_relative '../app'
 # Produce miniature markup.
 #
 # @see http://tug.ctan.org/tex-archive/macros/latex/contrib/floatflt/floatflt.pdf
-class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
-  include ::Aldine::Cli::Commands::Concerns::ImageMatch
-  include ::Aldine::Cli::Commands::Concerns::SvgConvert
-
+class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbImageCommand
   class << self
     protected
 
@@ -35,6 +32,14 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
         right: 'r',
         left: 'l',
       }
+    end
+
+    def overridables
+      {
+        width: :param_width,
+        margin: :param_margin,
+        position: :param_position,
+      }.then { |overridables| (super || {}).merge(overridables) }
     end
   end
 
@@ -80,16 +85,7 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
     end
   end
 
-  def output_basepath
-    source.expand_path.to_path
-  end
-
-  # Translates source (filepath without extension) to the best matching file.
-  #
-  # @return [Pathname]
-  def input_file
-    image_match!(source)
-  end
+  protected
 
   # Get position (set from options, or default).
   #
@@ -118,8 +114,6 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
     self.param_width || defaults[:width]
   end
 
-  protected
-
   # @return [Hash{Symbol => Object}]
   def defaults
     self.class.__send__(:defaults)
@@ -135,10 +129,10 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbCommand
   def variables_builder
     lambda do
       {
-        caption: nil, # @todo add an option to set caption
-        label: nil, # @todo add an option to set label
+        caption: self.caption,
+        label: self.label,
         input_file: self.input_file,
-        image_file: input_file.extname == '.svg' ? svg_convert(input_file) : input_file,
+        image_file: self.conversion,
         dimensions: self.dimensions,
         position: self.position,
       }

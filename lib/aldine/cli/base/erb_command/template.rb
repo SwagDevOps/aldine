@@ -92,7 +92,7 @@ class Aldine::Cli::Base::ErbCommand::Template
   # @return [Array<Pathname>]
   def paths
     [
-      Pathname.new(__dir__).join('../..', 'erb').realpath
+      Pathname.new(__FILE__).dirname.join('../..', 'erb').realpath
     ]
   end
 

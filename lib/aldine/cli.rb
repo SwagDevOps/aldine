@@ -54,7 +54,10 @@ module Aldine::Cli
     "#{__dir__}/cli/base".tap do |path|
       {
         BaseCommand: :base_command,
+        BasicCommand: :basic_command,
         ErbCommand: :erb_command,
+        ErbImageCommand: :erb_image_command,
+        OverridableCommand: :overridable_command,
       }.each { |k, v| autoload(k, "#{path}/#{v}") }
     end
   end

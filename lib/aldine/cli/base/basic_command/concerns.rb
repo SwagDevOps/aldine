@@ -8,10 +8,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../app'
+require_relative '../basic_command'
 
-# Base command.
-#
-# @abstract
-class Aldine::Cli::Base::BaseCommand < Aldine::Cli::Base::OverridableCommand
+# Concerns module.
+module Aldine::Cli::Base::BasicCommand::Concerns
+  "#{__dir__}/concerns".tap do |path|
+    {
+      Help: :help,
+      Parameters: :parameters,
+    }.each { |k, v| autoload(k, "#{path}/#{v}") }
+  end
 end

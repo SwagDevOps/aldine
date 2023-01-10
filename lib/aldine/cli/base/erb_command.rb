@@ -14,6 +14,9 @@ require_relative '../app'
 #
 # @abstract
 class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
+  autoload(:Pathname, 'pathname')
+  autoload(:Rouge, 'rouge')
+
   "#{__dir__}/erb_command".tap do |path|
     {
       Output: :output,
@@ -25,6 +28,14 @@ class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
 
   class << self
     protected
+
+    def overridables
+      {
+        debug: nil,
+        output: :param_output,
+        tags: :param_tags,
+      }
+    end
 
     # rubocop:disable Metrics/MethodLength
 
