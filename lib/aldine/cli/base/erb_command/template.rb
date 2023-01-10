@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Copyright (C) 2021-2022 Dimitri Arrigoni <dimitri@arrigoni.me>
+# Copyright (C) 2021-2023 Dimitri Arrigoni <dimitri@arrigoni.me>
 # License LGPLv3+: GNU Lesser General Public License version 3 or later
 # You may obtain a copy of the License at http://www.gnu.org/licenses/lgpl.txt.
 # Unless required by applicable law or agreed to in writing, software
@@ -92,7 +92,7 @@ class Aldine::Cli::Base::ErbCommand::Template
   # @return [Array<Pathname>]
   def paths
     [
-      Pathname.new(__dir__).join('../..', 'erb').realpath
+      Pathname.new(__FILE__).dirname.join('../..', 'erb').realpath
     ]
   end
 

@@ -1,5 +1,6 @@
-\section{<%= lovecraft.tome %>}
-
-<% 3.times do %>
-<%= "%s\n\n" % lovecraft.paragraph(sentence_count: rand(2..8)) %>
+<% if head %>
+<%= "%s\n\n" % head.call %>
+<% end %>
+<% paragraphs.each do |paragraph| %>
+<%= "%s\n\n" % paragraph %>
 <% end %>

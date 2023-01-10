@@ -6,5 +6,5 @@ AllCops:
   TargetRubyVersion: 2.7
   NewCops: disable
   SuggestExtensions: false
+Style/RedundantException: { Enabled: false }
 Style/TernaryParentheses: { Enabled: false }
-

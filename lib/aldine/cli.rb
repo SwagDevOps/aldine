@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Copyright (C) 2021-2022 Dimitri Arrigoni <dimitri@arrigoni.me>
+# Copyright (C) 2021-2023 Dimitri Arrigoni <dimitri@arrigoni.me>
 # License LGPLv3+: GNU Lesser General Public License version 3 or later
 # You may obtain a copy of the License at http://www.gnu.org/licenses/lgpl.txt.
 # Unless required by applicable law or agreed to in writing, software
@@ -54,7 +54,10 @@ module Aldine::Cli
     "#{__dir__}/cli/base".tap do |path|
       {
         BaseCommand: :base_command,
+        BasicCommand: :basic_command,
         ErbCommand: :erb_command,
+        ErbImageCommand: :erb_image_command,
+        OverridableCommand: :overridable_command,
       }.each { |k, v| autoload(k, "#{path}/#{v}") }
     end
   end

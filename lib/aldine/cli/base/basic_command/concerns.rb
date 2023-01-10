@@ -8,28 +8,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../commands'
+require_relative '../basic_command'
 
-# Base command.
-#
-# @abstract
-class Aldine::Local::Docker::Commands::BaseCommand
-  include(::Aldine::Concerns::SettingsAware)
-  include(::Aldine::Concerns::HasLocalShell)
-
-  def initialize(*)
-    super()
-  end
-
-  # @abstract
-  #
-  # @return [Array<String>]
-  def to_a
-    %w[/usr/bin/env docker]
-  end
-
-  # @return [Process::Status]
-  def call(exception: true, silent: false)
-    self.shell.sh(*self.to_a, exception: exception, silent: silent)
+# Concerns module.
+module Aldine::Cli::Base::BasicCommand::Concerns
+  "#{__dir__}/concerns".tap do |path|
+    {
+      Help: :help,
+      Parameters: :parameters,
+    }.each { |k, v| autoload(k, "#{path}/#{v}") }
   end
 end

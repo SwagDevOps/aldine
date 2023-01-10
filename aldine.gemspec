@@ -6,8 +6,8 @@
 # noinspection RubyLiteralArrayInspection
 Gem::Specification.new do |s|
   s.name        = "aldine"
-  s.version     = "0.1.0"
-  s.date        = "2022-12-31"
+  s.version     = "0.2.0"
+  s.date        = "2023-01-10"
   s.summary     = "Utilities and build system on top of LaTeX"
   s.description = "Light utilities for LaTeX (standalone document preparation system)"
 
@@ -33,11 +33,19 @@ Gem::Specification.new do |s|
     "lib/aldine/cli/app/loader.rb",
     "lib/aldine/cli/app/loader/parser.rb",
     "lib/aldine/cli/base/base_command.rb",
+    "lib/aldine/cli/base/basic_command.rb",
+    "lib/aldine/cli/base/basic_command/concerns.rb",
+    "lib/aldine/cli/base/basic_command/concerns/help.rb",
+    "lib/aldine/cli/base/basic_command/concerns/parameters.rb",
     "lib/aldine/cli/base/erb_command.rb",
     "lib/aldine/cli/base/erb_command/output.rb",
     "lib/aldine/cli/base/erb_command/output_type.rb",
     "lib/aldine/cli/base/erb_command/rouge.rb",
     "lib/aldine/cli/base/erb_command/template.rb",
+    "lib/aldine/cli/base/erb_image_command.rb",
+    "lib/aldine/cli/base/overridable_command.rb",
+    "lib/aldine/cli/base/overridable_command/helper.rb",
+    "lib/aldine/cli/base/overridable_command/override.rb",
     "lib/aldine/cli/commands/chapters_command.rb",
     "lib/aldine/cli/commands/concerns/image_match.rb",
     "lib/aldine/cli/commands/concerns/input_yaml.rb",

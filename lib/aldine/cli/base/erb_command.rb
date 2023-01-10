@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Copyright (C) 2021-2022 Dimitri Arrigoni <dimitri@arrigoni.me>
+# Copyright (C) 2021-2023 Dimitri Arrigoni <dimitri@arrigoni.me>
 # License LGPLv3+: GNU Lesser General Public License version 3 or later
 # You may obtain a copy of the License at http://www.gnu.org/licenses/lgpl.txt.
 # Unless required by applicable law or agreed to in writing, software
@@ -14,6 +14,9 @@ require_relative '../app'
 #
 # @abstract
 class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
+  autoload(:Pathname, 'pathname')
+  autoload(:Rouge, 'rouge')
+
   "#{__dir__}/erb_command".tap do |path|
     {
       Output: :output,
@@ -25,6 +28,14 @@ class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
 
   class << self
     protected
+
+    def overridables
+      {
+        debug: nil,
+        output: :param_output,
+        tags: :param_tags,
+      }
+    end
 
     # rubocop:disable Metrics/MethodLength
 
@@ -144,6 +155,10 @@ class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
   #
   # @return [String]
   def template_name
-    self.class.name.split('::').last.gsub(/(.)([A-Z])/, '\1_\2').downcase.gsub(/_command$/, '')
+    self.class.name.then do |class_name|
+      raise RuntimeError, 'Can not get class name' unless class_name
+
+      class_name.split('::').last.gsub(/(.)([A-Z])/, '\1_\2').downcase.gsub(/_command$/, '')
+    end
   end
 end

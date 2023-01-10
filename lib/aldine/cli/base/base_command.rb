@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Copyright (C) 2021-2022 Dimitri Arrigoni <dimitri@arrigoni.me>
+# Copyright (C) 2021-2023 Dimitri Arrigoni <dimitri@arrigoni.me>
 # License LGPLv3+: GNU Lesser General Public License version 3 or later
 # You may obtain a copy of the License at http://www.gnu.org/licenses/lgpl.txt.
 # Unless required by applicable law or agreed to in writing, software
@@ -13,29 +13,5 @@ require_relative '../app'
 # Base command.
 #
 # @abstract
-class Aldine::Cli::Base::BaseCommand < Aldine::Cli::Command
-  autoload(:Pathname, 'pathname')
-
-  class << self
-    protected
-
-    def inherited(subclass, &block)
-      super(subclass).then { block&.call(subclass) }
-    end
-  end
-
-  protected
-
-  # Returns the operating system's temporary file path.
-  #
-  # @return [Pathname]
-  def tmpdir
-    lambda do
-      require 'tmpdir'
-
-      Dir.tmpdir
-    end.yield_self do |tmp|
-      Pathname.new(ENV.fetch('TMPDIR', tmp.call)).expand_path
-    end
-  end
+class Aldine::Cli::Base::BaseCommand < Aldine::Cli::Base::OverridableCommand
 end

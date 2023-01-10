@@ -30,12 +30,40 @@ See also:
 * [Dotenv][bkeepers/dotenv]
 * [Dotenv Validator][fastruby/dotenv_validator]
 
+## Aliasing
+
+LaTeX commands provided by the package can be aliased (to be more semantic), as the following __example__:
+
+```latex
+% aldine --------------------------------------------------------------
+\DeclareCommandCopy\emptypage\aldineEmptyPage
+\DeclareCommandCopy\markdown\aldineMarkdown
+\DeclareCommandCopy\svgconv\aldineSvgConv
+\DeclareCommandCopy\blason\aldineBlason
+\DeclareCommandCopy\chapters\aldineChapters
+\DeclareCommandCopy\hyperrefSetup\aldineHyperrefSetup
+\DeclareCommandCopy\imageFull\aldineImageFull
+```
+
 ## Developper
+
+### Environment
+
+```dotenv
+# file: .env.local
+
+ALDINE__DIRECTORIES__LIB=tex
+ALDINE__DIRECTORIES__RUBY=lib
+```
+
+Dotenv above changes ``lib`` to ``tex`` for tex packages,
+and add ruby ``lib`` directory to mounted directories.
+It assumes working from the current sources directory.
 
 ### Replacement ``Rakefile`` in ``src`` and ``tmp`` directory
 
 ```ruby
-# frozen_string_literal: true                                                                 
+# frozen_string_literal: true
 
 require 'bundler/setup'
 require '/workdir/lib/aldine'
