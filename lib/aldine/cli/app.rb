@@ -72,7 +72,7 @@ class Aldine::Cli::App < ::Clamp::Command
 
     def load_commands
       # Load commands -------------------------------------------------------------
-      loader.call { |name, info| subcommand(name, info.description, info.class_name) }
+      loader.call { |name, info| subcommand(name, info.description, info.loader.call) }
     end
   end
 end

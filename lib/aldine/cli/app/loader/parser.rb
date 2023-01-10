@@ -33,6 +33,7 @@ class Aldine::Cli::App::Loader::Parser
     # Parse given file.
     #
     # @param [Pathname] file
+    # @return [Struct]
     def parse(file)
       self.new(file).call
     end
