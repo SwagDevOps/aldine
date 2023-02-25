@@ -92,7 +92,7 @@ class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
   def execute
     output_type = OutputType.new(param_output)
 
-    render.tap do |content|
+    render.chomp.tap do |content|
       unless output_type.disabled?
         rouge.call(content) if output_type.term?
         output.call(content) if output_type.file?
