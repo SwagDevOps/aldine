@@ -1,0 +1,6 @@
+% see: https://tug.org/FontCatalogue/otherfonts.html
+\input{<%= font %>.fd}% example - ArtNouv
+%! suppress = DiscouragedUseOfDef
+\def\LettrineFontInit{\usefont{U}{<%= font %>}{xl}{n}}%
+\renewcommand{\LettrineFontHook}{\LettrineFontInit}%
+\lettrine[<%= lettrine_config %>]{<%= first_char %>}{<%= remaining_chars %>}%
