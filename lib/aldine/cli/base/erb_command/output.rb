@@ -10,10 +10,12 @@
 
 require_relative '../erb_command'
 
-# Responsible of witing files.
+# Responsible of witing files onto filesystem.
 class Aldine::Cli::Base::ErbCommand::Output
   autoload(:FileUtils, 'fileutils')
   autoload(:Pathname, 'pathname')
+
+  include(::Aldine::Concerns::HasLocalFileSystem)
 
   # @param [String] basepath
   # @param [String] name
@@ -29,15 +31,27 @@ class Aldine::Cli::Base::ErbCommand::Output
     end.freeze
   end
 
-  def verbose?
-    self.verbose
+  # Write given given content onto filesystem.
+  #
+  # @return [Integer]
+  def call(content)
+    self.file.then do |file|
+      self.fs(silent: !self.verbose?).then do |fs|
+        fs.mkdir_p(file.dirname)
+        fs.touch(file)
+      end
+
+      file.write(content)
+    end
   end
 
-  def call(content)
-    fs.mkdir_p(file.dirname)
-    fs.touch(file)
-
-    file.write(content)
+  # Denote output is run with verbose file operations (``FileUtils``).
+  #
+  # @see #fs
+  #
+  # @return [Boolean]
+  def verbose?
+    self.verbose
   end
 
   protected
@@ -67,10 +81,5 @@ class Aldine::Cli::Base::ErbCommand::Output
       .concat(['tex'])
       .join('.')
       .then { |fp| Pathname.new(fp) }
-  end
-
-  # @return [Module<FileUtils::Verbose>, Module<FileUtils>]
-  def fs
-    verbose? ? FileUtils::Verbose : FileUtils
   end
 end

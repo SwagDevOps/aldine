@@ -5,65 +5,64 @@
 % Project repository and bug tracker:
 % https://github.com/SwagDevOps/aldine
 %
+% Changes:
+%
+% v0.1.1 - 2023/02/12 - trying to fix spaces added by shell commands
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\ProvidesPackage{aldine}[2023/01/07 v0.1.0 Aldine package]
-
+\ProvidesPackage{aldine}[2023/02/12 v0.1.1 Aldine package]
 % packages from CLI commands templates --------------------------------
-
 \RequirePackage{graphicx}
 \RequirePackage{hyperref}
-
 % packages used in commands below -------------------------------------
-
 \RequirePackage{shellesc}
 \RequirePackage{ifthen}  % provides conditonals...
 \RequirePackage{xargs}   % uses a key-value package to define the layout of the optional arguments: \newcommandx{\foo}[3][1=1, 3=n]{...}
-
 % emptypage -----------------------------------------------------------
-
-\newcommandx*{\aldineEmptyPage}[1][1=false] {
+\newcommandx*{\aldineEmptyPage}[1][1=false] {%
   \null
   \thispagestyle{empty}
-  \ifthenelse{\equal{\#1}{true}} { \addtocounter{page}{-1} } {}
+  \ifthenelse{\equal{\#1}{true}} { \addtocounter{page}{-1} } {}%
   \newpage
-}
-
+}%
+% exec ----------------------------------------------------------------
+\newcommand*{\aldineShellExec}[1] {%
+  \ShellEscape{#1}%
+}%
+% Include (right-here) given file.
+%
+% see: https://tex.stackexchange.com/questions/18017/space-inserted-after-input-call
+\newcommand*{\aldineInclude}[1] {%
+  \input{#1}%
+  \unskip%
+}%
 % commands ------------------------------------------------------------
-
-\newcommand*{\aldineMarkdown}[1] {
+\newcommand*{\aldineMarkdown}[1] {%
   % todo provide a command from aldine CLI commands
-  \ShellEscape{pandoc -t latex -o #1.markdown.tex #1.md}
-  \input{#1.markdown}
-}
-
+  \aldineShellExec{pandoc -t latex -o #1.markdown.tex #1.md}%
+  \aldineInclude{#1.markdown}%
+}%
 % aldine --------------------------------------------------------------
-
-\newcommandx*{\aldineSvgConv}[1] {
-  \ShellEscape{aldine svg-conv #1}
-}
-
-\newcommandx*{\aldineLorem}[2][2=,usedefault] {
-  \ShellEscape{aldine '#1' sample --override='#2'}
-  \input{#1.erb-sample}
-}
-
-\newcommandx*{\aldineBlason}[2][2=,usedefault] {
-  \ShellEscape{aldine miniature --floating '#1' --override='#2'}
-  \input{#1.erb-miniature}
-}
-
-\newcommandx*{\aldineChapters}[2][2=,usedefault] {
-  \ShellEscape{aldine chapters '#1' --override='#2'}
-  \input{#1.erb-chapters}
-}
-
-\newcommandx*{\aldineHyperrefSetup}[2][2=,usedefault] {
-  \ShellEscape{aldine hyperref-setup '#1' --override='#2'}
-  \input{#1.erb-hyperref_setup}
-}
-
-\newcommandx*{\aldineImageFull}[2][2=,usedefault] {
-  \ShellEscape{aldine image-full '#1' --override='#2'}
-  \input{#1.erb-image_full}
-}
+\newcommandx*{\aldineSvgConv}[1] {%
+  \aldineShellExec{aldine svg-conv #1}%
+}%
+\newcommandx*{\aldineLorem}[2][2=,usedefault] {%
+  \aldineShellExec{aldine sample '#1' --override='#2'}%
+  \aldineInclude{#1.erb-sample}%
+}%
+\newcommandx*{\aldineBlason}[2][2=,usedefault] {%
+  \aldineShellExec{aldine miniature --floating '#1' --override='#2'}%
+  \aldineInclude{#1.erb-miniature}%
+}%
+\newcommandx*{\aldineChapters}[2][2=,usedefault] {%
+  \aldineShellExec{aldine chapters '#1' --override='#2'}%
+  \aldineInclude{#1.erb-chapters}%
+}%
+\newcommandx*{\aldineHyperrefSetup}[2][2=,usedefault] {%
+  \aldineShellExec{aldine hyperref-setup '#1' --override='#2'}%
+  \aldineInclude{#1.erb-hyperref_setup}%
+}%
+\newcommandx*{\aldineImageFull}[2][2=,usedefault] {%
+  \aldineShellExec{aldine image-full '#1' --override='#2'}%
+  \aldineInclude{#1.erb-image_full}%
+}%
