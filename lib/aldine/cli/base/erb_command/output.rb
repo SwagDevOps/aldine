@@ -76,9 +76,9 @@ class Aldine::Cli::Base::ErbCommand::Output
   #
   # @return [Pathname]
   def file
-    [basepath, "erb-#{name}"]
+    [basepath]
       .concat(tags)
-      .concat(['tex'])
+      .concat(["erb-#{name}", 'tex'])
       .join('.')
       .then { |fp| Pathname.new(fp) }
   end
