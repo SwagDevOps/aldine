@@ -19,11 +19,13 @@ class Aldine::Cli::Base::ErbCommand::Output
 
   # @param [String] basepath
   # @param [String] name
+  # @param [Integer, nil] line_no
   # @param [Array<String>, nil] tags
   # @param [Boolean] verbose
-  def initialize(basepath, name, tags: nil, verbose: true)
+  def initialize(basepath, name, line_no: nil, tags: nil, verbose: true)
     self.tap do
       self.basepath = basepath.freeze
+      self.line_no = line_no
       self.name = name.freeze
       self.tags = (tags || []).map(&:to_s).reject(&:empty?).freeze
       # noinspection RubySimplifyBooleanInspection
@@ -59,12 +61,15 @@ class Aldine::Cli::Base::ErbCommand::Output
   # @type [String]
   attr_accessor :basepath
 
+  # @type [Integer, nil]
+  attr_accessor :line_no
+
   # @type [String]
   attr_accessor :name
 
   # Words added to the file.
   #
-  # @return [Array<String>]
+  # @return [Array<String>, nil]
   #
   # @see #file
   attr_accessor :tags
@@ -77,6 +82,7 @@ class Aldine::Cli::Base::ErbCommand::Output
   # @return [Pathname]
   def file
     [basepath]
+      .concat([line_no].compact)
       .concat(tags)
       .concat(["erb-#{name}", 'tex'])
       .join('.')

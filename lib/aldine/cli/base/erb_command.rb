@@ -34,6 +34,7 @@ class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
         debug: nil,
         output: :param_output,
         tags: :param_tags,
+        line_no: :param_line_no,
       }
     end
 
@@ -44,6 +45,7 @@ class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
         subclass.class_eval do
           parameter('SOURCE', 'source file (or directory)', { attribute_name: :param_source })
           option('--[no-]debug', :flag, 'enable debug messages', { default: true })
+          option('--line-no', 'LINE_NO', 'use with \the\inputlineno', { attribute_name: :param_line_no })
           option('--tags', 'TAGS', 'tags (comma separated tags)', { attribute_name: :param_tags })
           option(%w[-O --output], 'OUTPUT',
                  "output type {#{OutputType.types.join('|')}}",
@@ -67,6 +69,9 @@ class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
 
   # @!attribute [r] param_tags
   #   @return [String]
+
+  # @!attribute [r] param_line_no
+  #   @return [String, Integer, nil]
 
   # Get variables.
   #
@@ -120,11 +125,20 @@ class Aldine::Cli::Base::ErbCommand < Aldine::Cli::Base::BaseCommand
     Rouge.new
   end
 
+  # @return [Integer, nil]
+  def line_no
+    self.param_line_no.then do |v|
+      v.nil? ? nil : v.to_i
+    end.then do |v|
+      v and v >= 0 ? v : nil
+    end
+  end
+
   # Instance responsible to output a file result.
   #
   # @return [Output]
   def output
-    Output.new(output_basepath, template_name, tags: output_tags, verbose: debug?)
+    Output.new(output_basepath, template_name, line_no: line_no, tags: output_tags, verbose: debug?)
   end
 
   # @return [Array<String>]
