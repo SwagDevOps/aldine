@@ -11,6 +11,18 @@
 require_relative '../app'
 
 # Process given word (or sentence) to apply dropcap (through lettrine package).
+#
+# Sample of use
+#
+# ```latex
+# \aldineDropcap{Example of use for lettrine/dropcap}[
+#     font: GotIn,
+#     config: "lines=3, lraise=0.15",
+# ].
+# ```
+#
+# @see https://texdoc.org/serve/lettrine.pdf/0
+# @see https://tug.org/FontCatalogue/otherfonts.html
 class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
   # Default lettrine font.
   #
@@ -35,8 +47,8 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
            attribute_name: :param_font
          }, &:to_s)
 
-  option('--lettrine-config', 'LETTRINE_CONFIG',
-         'options used by lettrine package',
+  option('--config', 'CONFIG',
+         'config/options used by lettrine package',
          {
            default: LETTRINE_CONFIG,
            attribute_name: :param_lettrine_config
@@ -87,7 +99,7 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
       self.parts.then do |parts|
         {
           font: param_font || DEFAULT_FONT,
-          lettrine_config: param_lettrine_config || LETTRINE_CONFIG,
+          config: param_lettrine_config || LETTRINE_CONFIG,
           first_char: parts.fetch(0),
           remaining_chars: parts.fetch(1),
         }
