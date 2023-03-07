@@ -8,6 +8,7 @@
     'README.md',
     'bin/*',
     'lib/**/*.rb',
+    'lib/**/*.erb',
     'lib/**/version.yml',
     'lib/**/resources/**/*',
 ].map { |m| Dir.glob(m) }.flatten.keep_if { |f| File.file?(f) }.sort
