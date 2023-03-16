@@ -21,29 +21,39 @@ require_relative '../app'
 # ].
 # ```
 #
+# Can be configured through settings (`` cli.commnads.dropcap.defaults`` on ``font`` and ``lettrine_config``).
+#
 # @see https://texdoc.org/serve/lettrine.pdf/0
 # @see https://tug.org/FontCatalogue/otherfonts.html
 class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
-  # Default lettrine font.
-  #
-  # @todo Use a more global mechanism to set this.
-  #
-  # @api private
-  DEFAULT_FONT = 'ArtNouv'
-
-  # Default lettrine config.
-  #
-  # @todo Use a more global mechanism to set this.
-  #
-  # @api private
-  LETTRINE_CONFIG = 'lines=3, loversize=0.1'
-
   parameter('SOURCE', 'source word (sentence or chars)', { attribute_name: :param_source })
+
+  class << self
+    include(::Aldine::Concerns::SettingsAware)
+
+    protected
+
+    # @api private
+    #
+    # @return [Hash{Symbol => Object}]
+    def defaults
+      'cli.commnads.dropcap.defaults'.then do |base_path|
+        {
+          font: 'ArtNouv',
+          lettrine_config: 'lines=3, loversize=0.1',
+        }.map do |k, v|
+          [k, self.settings.get("#{base_path}.#{k}", v)]
+        rescue KeyError
+          [k, v]
+        end
+      end.to_h.freeze
+    end
+  end
 
   option('--font', 'FONT',
          'font used to render dropcap',
          {
-           default: DEFAULT_FONT,
+           default: defaults.fetch(:font),
            attribute_name: :param_font
          }, &:to_s)
   option('--[no-]load-fd', :flag, 'load font-description', { default: true })
@@ -51,7 +61,7 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
   option('--config', 'CONFIG',
          'config/options used by lettrine package',
          {
-           default: LETTRINE_CONFIG,
+           default: defaults.fetch(:lettrine_config),
            attribute_name: :param_lettrine_config
          }, &:to_s)
 
@@ -69,6 +79,23 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
 
   protected
 
+  def variables
+    self.parts.then do |parts|
+      {
+        font: font,
+        fd: self.load_fd? ? "#{font}.fd" : nil,
+        config: lettrine_config,
+        first_char: parts.fetch(0),
+        remaining_chars: parts.fetch(1),
+      }
+    end
+  end
+
+  # @return [Hash{Symbol => Object}]
+  def defaults
+    self.class.__send__(:defaults)
+  end
+
   # @!attribute [r] param_font
   #   @see https://tug.org/FontCatalogue/otherfonts.html
   #   @return [String, nil]
@@ -82,7 +109,12 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
 
   # Get font used in template (according to given option or default).
   def font
-    param_font || DEFAULT_FONT
+    param_font || defaults.fetch(:font)
+  end
+
+  # Get config for lettrine package.
+  def lettrine_config
+    param_lettrine_config || defaults.fetch(:lettrine_config)
   end
 
   # Get parts from given word or sentence.
@@ -104,21 +136,4 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
   def output_basepath
     parts.fetch(0)
   end
-
-  # rubocop:disable Metrics/MethodLength
-
-  def variables_builder
-    lambda do
-      self.parts.then do |parts|
-        {
-          font: font,
-          fd: self.load_fd? ? "#{font}.fd" : nil,
-          config: param_lettrine_config || LETTRINE_CONFIG,
-          first_char: parts.fetch(0),
-          remaining_chars: parts.fetch(1),
-        }
-      end
-    end
-  end
-  # rubocop:enable Metrics/MethodLength
 end
