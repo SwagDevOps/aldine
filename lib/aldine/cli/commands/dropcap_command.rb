@@ -46,6 +46,7 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
            default: DEFAULT_FONT,
            attribute_name: :param_font
          }, &:to_s)
+  option('--[no-]load-fd', :flag, 'load font-description', { default: true })
 
   option('--config', 'CONFIG',
          'config/options used by lettrine package',
@@ -60,6 +61,7 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
     def overridables
       {
         font: :param_font,
+        load_fd: nil,
         lettrine_config: :param_lettrine_config,
       }.then { |override| super.merge(override) }
     end
@@ -71,8 +73,17 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
   #   @see https://tug.org/FontCatalogue/otherfonts.html
   #   @return [String, nil]
 
+  # @!method load_fd?
+  #   Denotes font-description is loaded.
+  #   @return [Boolean]
+
   # @!attribute [r] param_lettrine_config
   #   @return [String, nil]
+
+  # Get font used in template (according to given option or default).
+  def font
+    param_font || DEFAULT_FONT
+  end
 
   # Get parts from given word or sentence.
   #
@@ -94,11 +105,14 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
     parts.fetch(0)
   end
 
+  # rubocop:disable Metrics/MethodLength
+
   def variables_builder
     lambda do
       self.parts.then do |parts|
         {
-          font: param_font || DEFAULT_FONT,
+          font: font,
+          fd: self.load_fd? ? "#{font}.fd" : nil,
           config: param_lettrine_config || LETTRINE_CONFIG,
           first_char: parts.fetch(0),
           remaining_chars: parts.fetch(1),
@@ -106,4 +120,5 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
       end
     end
   end
+  # rubocop:enable Metrics/MethodLength
 end
