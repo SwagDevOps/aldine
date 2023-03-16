@@ -1,7 +1,7 @@
 % see: https://texdoc.org/serve/lettrine.pdf/0
 <% if fd %>
 % see: https://tug.org/FontCatalogue/otherfonts.html
-\input{<%= font %>.fd}% example - ArtNouv
+\input{<%= fd %>}% example - ArtNouv.fd
 %! suppress = DiscouragedUseOfDef
 \def\LettrineFontInit{\usefont{U}{<%= font %>}{xl}{n}}%
 \renewcommand{\LettrineFontHook}{\LettrineFontInit}%
