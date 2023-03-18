@@ -8,19 +8,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-require_relative '../aldine'
+require_relative '../concerns'
 
-# Namespace module for concerns.
-module Aldine::Concerns
-  "#{__dir__}/concerns".then do |libdir|
-    {
-      DefineTmpdir: :define_tmpdir,
-      Freezable: :freezable,
-      Freezer: :freezer,
-      HasInflector: :has_inflector,
-      HasLocalFileSystem: :has_local_file_system,
-      HasLocalShell: :has_local_shell,
-      SettingsAware: :settings_aware,
-    }.each { |k, v| autoload(k, "#{libdir}/#{v}") }
+# Provides ``define_tmpdir`` method.
+module Aldine::Concerns::DefineTmpdir
+  autoload(:Pathname, 'pathname')
+
+  # Define ``tmpdir`` on given attribute (using accessor)
+  #
+  # @param [Symbol] attribute
+  # @param [Pathname, String, nil] tmpdir
+  #
+  # @return [self]
+  def define_tmpdir(attribute, tmpdir: nil)
+    lambda do
+      require 'tmpdir'
+
+      Pathname.new(Dir.tmpdir).expand_path
+    end.then do |functor|
+      self.__send__("#{attribute}=", Pathname.new(tmpdir || functor.call))
+    end
   end
 end
