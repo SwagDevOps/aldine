@@ -31,7 +31,7 @@ module Aldine::Cli::Commands::Concerns::SvgConvert
   #
   # @return [Aldine::Cli::Commands::Shared::SvgConv]
   def svg_converter
-    Aldine::Cli::Commands::Shared::SvgConv.new(**svg_converter_options)
+    ::Aldine::Cli::Commands::Shared::SvgConv.new(**svg_converter_options)
   end
 
   # @return [Hash{Symbol => Object}]
