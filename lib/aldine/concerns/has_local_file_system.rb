@@ -10,14 +10,16 @@
 
 require_relative '../concerns'
 
-# Provides access to ``shell``.
+# Provides access to file system.
 module Aldine::Concerns::HasLocalFileSystem
   protected
 
   # @return [Module<FileUtils>, Module<FileUtils::Verbose>]
   def fs(silent: false)
-    # @type [::Aldine::Local::Shell] shell
-    (self.is_a?(::Aldine::Concerns::HasLocalShell) ? shell : ::Aldine::Local::Shell)
-      .then { |shell| shell.fs(silent: silent) }
+    require('fileutils').then do
+      ::FileUtils::Verbose.instance_variable_set(:@fileutils_output, $stderr)
+
+      silent ? ::FileUtils : ::FileUtils::Verbose
+    end
   end
 end
