@@ -172,8 +172,9 @@ class Aldine::Cli::Commands::Shared::SvgConv # rubocop:disable Metrics/ClassLeng
   def write_cache(cache_file, payload)
     return false unless cache?
 
-    fs.mkdir_p(cache_file.dirname)
-    fs.touch(cache_file)
+    fs.mkdir_p(cache_file.dirname) unless cache_file.dirname.directory?
+    fs.touch(cache_file) unless cache_file.file?
+
     cache_file.write(JSON.pretty_generate(payload))
   end
 

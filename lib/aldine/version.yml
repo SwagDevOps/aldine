@@ -1,10 +1,10 @@
 ---
 major: 0
 minor: 2
-patch: 1
+patch: 2
 authors: ['Dimitri Arrigoni']
 email: 'dimitri@arrigoni.me'
-date: '2023-02-26'
+date: '2023-03-18'
 homepage: 'https://github.com/SwagDevOps/aldine'
 # MUST follow the higher required_ruby_version
 # requires version >= 2.3.0 due to safe navigation operator &

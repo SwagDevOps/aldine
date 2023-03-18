@@ -37,8 +37,8 @@ class Aldine::Cli::Base::ErbCommand::Output
   def call(content)
     self.file.then do |file|
       self.fs(silent: !self.verbose?).then do |fs|
-        fs.mkdir_p(file.dirname)
-        fs.touch(file)
+        fs.mkdir_p(file.dirname) unless file.dirname.directory?
+        fs.touch(file) unless file.exist?
       end
 
       file.write(content)
