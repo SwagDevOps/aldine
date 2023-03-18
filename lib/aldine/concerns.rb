@@ -14,6 +14,7 @@ require_relative '../aldine'
 module Aldine::Concerns
   "#{__dir__}/concerns".then do |libdir|
     {
+      DefineTmpdir: :define_tmpdir,
       Freezable: :freezable,
       Freezer: :freezer,
       HasInflector: :has_inflector,

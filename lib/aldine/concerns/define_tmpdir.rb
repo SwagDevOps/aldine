@@ -10,16 +10,23 @@
 
 require_relative '../concerns'
 
-# Provides access to file system.
-module Aldine::Concerns::HasLocalFileSystem
-  protected
+# Provides ``define_tmpdir`` method.
+module Aldine::Concerns::DefineTmpdir
+  autoload(:Pathname, 'pathname')
 
-  # @return [Module<FileUtils>, Module<FileUtils::Verbose>]
-  def fs(silent: false)
-    require('fileutils').then do
-      ::FileUtils::Verbose.instance_variable_set(:@fileutils_output, $stderr)
+  # Define ``tmpdir`` on given attribute (using accessor)
+  #
+  # @param [Symbol] attribute
+  # @param [Pathname, String, nil] tmpdir
+  #
+  # @return [self]
+  def define_tmpdir(attribute, tmpdir: nil)
+    lambda do
+      require 'tmpdir'
 
-      silent ? ::FileUtils : ::FileUtils::Verbose
+      Pathname.new(Dir.tmpdir).expand_path
+    end.then do |functor|
+      self.__send__("#{attribute}=", Pathname.new(tmpdir || functor.call))
     end
   end
 end
