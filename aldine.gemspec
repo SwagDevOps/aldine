@@ -6,7 +6,7 @@
 # noinspection RubyLiteralArrayInspection
 Gem::Specification.new do |s|
   s.name        = "aldine"
-  s.version     = "0.2.2"
+  s.version     = "0.2.3"
   s.date        = "2023-03-18"
   s.summary     = "Utilities and build system on top of LaTeX"
   s.description = "Light utilities for LaTeX (standalone document preparation system)"
@@ -56,8 +56,11 @@ Gem::Specification.new do |s|
     "lib/aldine/cli/commands/sample_command.rb",
     "lib/aldine/cli/commands/shared/files_matcher.rb",
     "lib/aldine/cli/commands/shared/svg_conv.rb",
+    "lib/aldine/cli/commands/shared/svg_conv/cache.rb",
+    "lib/aldine/cli/commands/shared/svg_conv/target.rb",
     "lib/aldine/cli/commands/svg_conv_command.rb",
     "lib/aldine/concerns.rb",
+    "lib/aldine/concerns/define_tmpdir.rb",
     "lib/aldine/concerns/freezable.rb",
     "lib/aldine/concerns/freezer.rb",
     "lib/aldine/concerns/has_inflector.rb",
