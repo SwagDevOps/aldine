@@ -72,7 +72,7 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
       {
         font: :param_font,
         load_fd: nil,
-        lettrine_config: :param_lettrine_config,
+        config: :param_lettrine_config,
       }.then { |override| super.merge(override) }
     end
   end
