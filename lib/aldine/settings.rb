@@ -49,7 +49,7 @@ class Aldine::Settings
 
   # @param [Hash{String => String}, nil] payload
   def initialize(payload = nil)
-    @payload = Parser.new(settings_namespace, payload || ENV.to_h).call(&:deep_freeze)
+    @payload = Parser.new(settings_namespace, payload || ::ENV.to_h).call(&:deep_freeze)
   end
 
   def settings_namespace
@@ -66,13 +66,34 @@ class Aldine::Settings
   end
 
   class << self
+    # Get current (singleton) instance.
+    #
+    # @return [self]
     def instance
       # @todo renew instance when env changes.
-      self.instance = @instance || self.new
+      -> { @instance }.tap { boot }.call
+    end
+
+    # Boot (initialize) settings.
+    #
+    # @return [Integer]
+    def boot(reload: false)
+      -> { @instance }.tap { self.startup(reload: reload) }.call.to_h.size
     end
 
     protected
 
     attr_writer :instance
+
+    # Start (load instance).
+    #
+    # @api private
+    #
+    # @return [Class<self>]
+    def startup(reload: false)
+      self.tap do
+        self.instance = (reload ? nil : @instance) || self.new
+      end
+    end
   end
 end
