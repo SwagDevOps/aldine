@@ -21,7 +21,24 @@ require_relative '../app'
 # ].
 # ```
 #
-# Can be configured through settings (`` cli.commnads.dropcap.defaults`` on ``font`` and ``lettrine_config``).
+# Can be configured through settings (``cli.commands.dropcap.defaults`` on ``font`` and ``lettrine_config``).
+#
+# Configs can be sets on settings ``cli.commands.dropcap.lettrine_configs``
+#
+# Example
+#
+# ```shell
+# # file: .env.local
+# ALDINE__CLI__COMMANDS__DROPCAP__DEFAULTS__LETTRINE_CONFIG = 'lines=3, loversize=0.1'
+# ALDINE__CLI__COMMANDS__DROPCAP__DEFAULTS__FONT = 'ArtNouv'
+# ALDINE__CLI__COMMANDS__DROPCAP__LETTRINE_CONFIGS__SAMPLE = 'lines=4, loversize=0.8'
+# ```
+# ```latex
+# \dropcap{Named config}[
+#     font: GotIn,
+#     config: "@sample",
+# ]
+# ```
 #
 # @see https://texdoc.org/serve/lettrine.pdf/0
 # @see https://tug.org/FontCatalogue/otherfonts.html
@@ -34,10 +51,11 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
     protected
 
     # @api private
-    #
+    SETTINGS_BASE_PATH = 'cli.commands.dropcap'
+
     # @return [Hash{Symbol => Object}]
     def defaults
-      'cli.commnads.dropcap.defaults'.then do |base_path|
+      "#{SETTINGS_BASE_PATH}.defaults".then do |base_path|
         {
           font: 'ArtNouv',
           lettrine_config: 'lines=3, loversize=0.1',
@@ -47,6 +65,17 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
           [k, v]
         end
       end.to_h.freeze
+    end
+
+    # @return [Hash{String => String}]
+    def configs
+      "#{SETTINGS_BASE_PATH}.lettrine_configs".then do |path|
+        self.settings.get(path).then do |configs|
+          configs.is_a?(Hash) ? configs.map { |k, v| [k.to_s, v.to_s] }.to_h : {}
+        end
+      rescue KeyError
+        {}
+      end
     end
   end
 
@@ -82,6 +111,7 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
   def variables
     self.parts.then do |parts|
       {
+        defaults: defaults,
         font: font,
         fd: self.load_fd? ? "#{font}.fd" : nil,
         config: lettrine_config,
@@ -94,6 +124,11 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
   # @return [Hash{Symbol => Object}]
   def defaults
     self.class.__send__(:defaults)
+  end
+
+  # @return [Hash{String => String}]
+  def configs
+    self.class.__send__(:configs)
   end
 
   # @!attribute [r] param_font
@@ -114,7 +149,11 @@ class Aldine::Cli::Commands::DropcapCommand < Aldine::Cli::Base::ErbCommand
 
   # Get config for lettrine package.
   def lettrine_config
-    param_lettrine_config || defaults.fetch(:lettrine_config)
+    param_lettrine_config.then do |config|
+      if config.match(/^@.+$/)
+        self.class.__send__(:configs).fetch(config.gsub(/^@/, ''), nil)
+      end
+    end || defaults.fetch(:lettrine_config)
   end
 
   # Get parts from given word or sentence.
