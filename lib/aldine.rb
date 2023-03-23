@@ -45,16 +45,14 @@ module Aldine
   end
 
   class << self
-    # @return [Settings]
-    def settings
-      Settings.instance
-    end
-
     # Load environment variables from ``.env`` file into ``ENV``.
     #
     # @return [Hash{String => String}]
     def dotenv(&block)
-      DotenvLoader.new.call(&block)
+      DotenvLoader.new.then do |dotenv|
+        dotenv.call(&block)
+              .tap { ::Aldine::Settings.boot(reload: true) }
+      end
     end
   end
 end

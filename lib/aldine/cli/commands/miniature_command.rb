@@ -12,25 +12,35 @@ require_relative '../app'
 
 # Produce miniature markup.
 #
-# @see http://tug.ctan.org/tex-archive/macros/latex/contrib/floatflt/floatflt.pdf
+# @see https://www.overleaf.com/learn/latex/Wrapping_text_around_figures
+# @todo Use different template depending on float option.
 class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbImageCommand
   class << self
     protected
 
     # @return [Hash{Symbol => Object}]
     def defaults
-      {
-        width: 2.0,
-        margin: 0.1,
-        position: self.positions.keys.fetch(0).to_s,
-      }
+      false.then do |floating|
+        {
+          floating: floating,
+          width: 2.0,
+          margin: 0.1,
+          position: self.positions.values.fetch(0).to_s.__send__(floating ? :upcase : :downcase),
+        }
+      end
     end
 
+    # Positions.
+    #
+    # The uppercase version allows the figure to float. The lowercase version means exactly here.
+    #
     # @return [Hash{Symbol => String}]
     def positions
       {
         right: 'r',
         left: 'l',
+        inside: 'i',
+        outside: 'o',
       }
     end
 
@@ -55,11 +65,6 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbImageComma
   # @!method floating?
   #   Denote image is supposed to float.
   #
-  #   The capital ``L`` or ``R`` (instead of lower case ``l`` or ``r``)
-  #   to have the image float on the page.
-  #   Placing it with lower case letters will have the image displayed exactly where it was defined.
-  #   This could e.g. result in an image displayed kind of 'between' two pages.
-  #
   #   @return [Boolean]
 
   # set command options
@@ -73,7 +78,7 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbImageComma
       end
     end
 
-    option('--[no-]floating', :flag, 'miniature is floating')
+    option('--[no-]floating', :flag, 'miniature is floating', default: self.defaults.fetch(:floating))
 
     {
       default: self.defaults.fetch(:position),
@@ -91,10 +96,10 @@ class Aldine::Cli::Commands::MiniatureCommand < Aldine::Cli::Base::ErbImageComma
   #
   # @return [String]
   def position
-    (self.param_position || self.defaults.fetch(:position)).then do |position|
-      self.class.__send__(:positions).fetch(position.to_sym, position).to_s
-    end.then do |position|
-      position.__send__(self.floating? ? :upcase : :downcase)
+    (self.param_position || self.defaults.fetch(:position)).to_sym.then do |v|
+      return (self.class.__send__(:positions)[v] || v).to_s
+    end.then do |v|
+      self.floating? ? v.upcase : v
     end
   end
 

@@ -29,16 +29,8 @@ end
 docker = ::Aldine::Local::Docker
 tex = ::Aldine::Local::Tex
 
-# mixins ----------------------------------------------------------------------
-
-[
-  ::Aldine::Concerns::SettingsAware,
-].each { |mixin| self.__send__(:include, mixin) }
-
-# @note Mixins documentation only (IDE helper).
-class Object
-  # @!method settings()
-  #   @return [Aldine::Settings]
+def settings
+  ::Aldine::Settings.instance
 end
 
 # tasks ----------------------------------------------------------------------

@@ -30,6 +30,10 @@ class Aldine::Cli::App < ::Clamp::Command
   end
 
   class << self
+    def run(invocation_path = File.basename($PROGRAM_NAME), arguments = ARGV, context = {})
+      ::Aldine.dotenv.then { super }
+    end
+
     protected
 
     # @return [String]

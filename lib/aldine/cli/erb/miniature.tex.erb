@@ -1,11 +1,12 @@
+%! suppress = MissingImport
+% see: # @see http://tug.ctan.org/tex-archive/macros/latex/contrib/floatflt/floatflt.pdf
 % see: https://tex.stackexchange.com/questions/57178/inserting-an-image-on-the-right
-\begin{wrapfigure}{<%= position %>}{<%= dimensions.fetch(0) %>cm}
-    \centering
-    \includegraphics[width=<%= dimensions.fetch(1) %>cm,keepaspectratio]{<%= image_file %>}
+\begin{wrapfigure}{<%= position %>}{<%= dimensions.fetch(0) %>cm}%
+    \includegraphics[width=<%= dimensions.fetch(1) %>cm,keepaspectratio]{<%= image_file %>}%
     <% if caption %>
-    \caption{<%= caption %>}
+    \caption{<%= caption %>}%
     <% end %>
     <% if label %>
-    \label{<%= label %>}
+    \label{<%= label %>}%
     <% end %>
-\end{wrapfigure}
+\end{wrapfigure}%
