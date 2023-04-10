@@ -29,9 +29,25 @@ class Aldine::Cli::App < ::Clamp::Command
     Errno::ENOTSUP::Errno.tap { |status| exit(status) }
   end
 
+  # noinspection YARDTagsInspection
   class << self
-    def run(invocation_path = File.basename($PROGRAM_NAME), arguments = ARGV, context = {})
-      ::Aldine.dotenv.then { super }
+    # Create an instance of this command class, and run it.
+    #
+    # @param [String] invocation_path the path used to invoke the command
+    # @param [Array<String>] arguments command-line arguments
+    # @param [Hash] context additional data the command may need
+    def call(...)
+      self.boot
+          .then { self.run(...) }
+    end
+
+    # @return [self]
+    def boot
+      self.tap do
+        ::Aldine
+          .dotenv
+          .then { load_commands }
+      end
     end
 
     protected
@@ -46,15 +62,17 @@ class Aldine::Cli::App < ::Clamp::Command
     # @return [Array<Pathname>]
     def paths
       [
-        Pathname.new(__dir__).join('commands')
-      ]
+        __dir__&.then { |dir| Pathname.new(dir).join('commands') }
+      ].compact
     end
 
     def loader
       Loader.new(self.paths)
     end
-  end
 
-  # Load commands -------------------------------------------------------------
-  loader.call { |name, info| subcommand(name, info.description, info.class_name) }
+    def load_commands
+      # Load commands -------------------------------------------------------------
+      loader.call { |name, info| subcommand(name, info.description, info.class_name) }
+    end
+  end
 end
