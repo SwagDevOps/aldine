@@ -32,16 +32,8 @@ module Aldine
       Utils: :utils,
     }.each { |k, v| autoload(k, libdir.join(v.to_s)) }
 
-    include Bundleable
-
-    # @todo use autoload mechanism to set VERSION constant
-    lambda do
-      require('kamaze/version')
-
-      self.const_set(:VERSION, ::Kamaze::Version.new(libdir.join('version.yml')).freeze)
-    end.then do |f|
-      f.call unless self.constants(false).include?(:VERSION)
-    end
+    # @todo due to a "bug" in bundleable version can not be autoloaded - SHOULD fix bunleable
+    require(libdir.join('version').to_s).then { include(Bundleable) }
   end
 
   class << self

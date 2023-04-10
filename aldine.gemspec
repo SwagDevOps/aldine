@@ -108,6 +108,7 @@ Gem::Specification.new do |s|
     "lib/aldine/utils.rb",
     "lib/aldine/utils/bundle_config.rb",
     "lib/aldine/utils/template_string.rb",
+    "lib/aldine/version.rb",
     "lib/aldine/version.yml",
   ]
 
