@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative('../lib/aldine').then do
-  # noinspection RubyMismatchedReturnType
-  Aldine::Cli::App.run
-end
+require_relative('../lib/aldine')
+  .then { Aldine::Cli::App.call }
