@@ -17,6 +17,7 @@ class Aldine::Cli::App < ::Clamp::Command
   autoload(:Pathname, 'pathname')
 
   {
+    Config: 'config',
     Loader: 'loader',
   }.each { |k, v| autoload(k, "#{__dir__}/app/#{v}") }
 

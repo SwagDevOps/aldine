@@ -4,6 +4,7 @@
 *~
 /**/.*
 /cache/
+/config/*
 /coverage/
 /doc/
 /src/
