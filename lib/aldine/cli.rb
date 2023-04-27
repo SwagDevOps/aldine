@@ -36,6 +36,8 @@ module Aldine::Cli
       {
         FilesMatcher: :files_matcher,
         SvgConv: :svg_conv,
+        TexConfig: 'tex_config',
+
       }.each { |k, v| autoload(k, "#{__dir__}/cli/commands/shared/#{v}") }
     end
 
